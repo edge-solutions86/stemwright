@@ -5,3 +5,4 @@ export * from './domain/time/civil.js';
 export * from './domain/time/window.js';
 export * from './domain/features/schema.js';
 export * from './domain/features/bundle.js';
+export * from './domain/features/notation.js';
