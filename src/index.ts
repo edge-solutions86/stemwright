@@ -6,3 +6,4 @@ export * from './domain/time/window.js';
 export * from './domain/features/schema.js';
 export * from './domain/features/bundle.js';
 export * from './domain/features/notation.js';
+export * from './domain/features/selector.js';
