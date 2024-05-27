@@ -8,3 +8,4 @@ export * from './domain/features/bundle.js';
 export * from './domain/features/notation.js';
 export * from './domain/features/selector.js';
 export * from './domain/lexicon/inflection-class.js';
+export * from './domain/lexicon/stem.js';
