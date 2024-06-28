@@ -14,3 +14,4 @@ export * from './domain/lexicon/lexicon.js';
 export * from './domain/paradigm/profile.js';
 export * from './domain/paradigm/syncretism.js';
 export * from './domain/paradigm/revision.js';
+export * from './domain/paradigm/cell.js';
