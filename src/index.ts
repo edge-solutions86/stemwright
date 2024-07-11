@@ -17,3 +17,4 @@ export * from './domain/paradigm/revision.js';
 export * from './domain/paradigm/cell.js';
 export * from './domain/paradigm/realise.js';
 export * from './domain/paradigm/table.js';
+export * from './domain/ortho/folding.js';
