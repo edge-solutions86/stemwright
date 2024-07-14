@@ -18,3 +18,4 @@ export * from './domain/paradigm/cell.js';
 export * from './domain/paradigm/realise.js';
 export * from './domain/paradigm/table.js';
 export * from './domain/ortho/folding.js';
+export * from './domain/ortho/tolerance.js';
