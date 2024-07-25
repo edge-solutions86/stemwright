@@ -20,3 +20,4 @@ export * from './domain/paradigm/table.js';
 export * from './domain/ortho/folding.js';
 export * from './domain/ortho/tolerance.js';
 export * from './domain/ortho/distance.js';
+export * from './domain/ortho/compare.js';
