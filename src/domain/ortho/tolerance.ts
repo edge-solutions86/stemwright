@@ -50,11 +50,8 @@ export function orthoProfile(input: OrthoProfileInput): OrthoProfile {
       continue;
     }
     seen.add(key);
-    let folds: FoldStepKey[];
-    try {
-      folds = normaliseFoldList(raw.folds);
-    } catch (error) {
-      problems.add(`levels.${index}`, (error as Error).message);
+    const folds = problems.absorbFlat(`levels.${index}`, () => normaliseFoldList(raw.folds));
+    if (folds === undefined) {
       continue;
     }
     levels.push({ key, label: raw.label ?? key, folds });

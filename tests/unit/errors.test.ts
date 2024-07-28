@@ -133,3 +133,69 @@ describe('ProblemCollector', () => {
 });
 
 type ErrorDetailArray = { path: string; message: string }[];
+
+describe('ProblemCollector.absorb', () => {
+  it('returns the value when nothing was thrown', () => {
+    const collector = new ProblemCollector();
+    expect(collector.absorb('inherent', () => 42)).toBe(42);
+    expect(collector.size).toBe(0);
+  });
+
+  it('nests the details of a validation failure under the path', () => {
+    const collector = new ProblemCollector();
+    const result = collector.absorb('inherent', () => {
+      throw new ValidationError('two problems', {
+        details: [
+          { path: 'case', message: 'is unknown' },
+          { path: 'number', message: 'is unknown' },
+        ],
+      });
+    });
+    expect(result).toBeUndefined();
+    expect(collector.problems()).toEqual([
+      { path: 'inherent.case', message: 'is unknown' },
+      { path: 'inherent.number', message: 'is unknown' },
+    ]);
+  });
+
+  it('records one problem for a failure that is not a validation error', () => {
+    const collector = new ProblemCollector();
+    collector.absorb('inherent', () => {
+      throw new TypeError('cannot read the schema');
+    });
+    expect(collector.problems()).toEqual([{ path: 'inherent', message: 'cannot read the schema' }]);
+  });
+
+  it('records a validation error carrying no details as one problem', () => {
+    const collector = new ProblemCollector();
+    collector.absorb('inherent', () => {
+      throw new ValidationError('nothing more to say');
+    });
+    expect(collector.problems()).toEqual([{ path: 'inherent', message: 'nothing more to say' }]);
+  });
+});
+
+describe('ProblemCollector.absorbFlat', () => {
+  it('keeps the caller path and folds the detail into the message', () => {
+    const collector = new ProblemCollector();
+    collector.absorbFlat('slots.0', () => {
+      throw ValidationError.field('bundle', 'is not a feature value');
+    });
+    expect(collector.problems()).toEqual([
+      { path: 'slots.0', message: 'bundle is not a feature value' },
+    ]);
+  });
+
+  it('returns the value when nothing was thrown', () => {
+    const collector = new ProblemCollector();
+    expect(collector.absorbFlat('slots.0', () => 'kept')).toBe('kept');
+  });
+
+  it('records one problem for anything else that was thrown', () => {
+    const collector = new ProblemCollector();
+    collector.absorbFlat('slots.0', () => {
+      throw new RangeError('out of range');
+    });
+    expect(collector.problems()).toEqual([{ path: 'slots.0', message: 'out of range' }]);
+  });
+});

@@ -19,6 +19,9 @@ export interface FeatureBundle {
 
 export type FeatureInput = Readonly<Record<string, string>>;
 
+/** The bundle that fixes nothing. Shared because it is immutable and common. */
+export const EMPTY_BUNDLE: FeatureBundle = { pairs: [] };
+
 export function featureBundle(schema: FeatureSchema, input: FeatureInput): FeatureBundle {
   const problems = new ProblemCollector();
   const pairs: FeaturePair[] = [];

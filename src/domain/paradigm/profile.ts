@@ -76,11 +76,8 @@ export function paradigmProfile(
 
   for (const [index, slotInput] of input.slots.entries()) {
     const path = `slots.${index}`;
-    let bundle: FeatureBundle;
-    try {
-      bundle = readBundle(schema, slotInput.bundle, path);
-    } catch (error) {
-      problems.add(path, (error as Error).message);
+    const bundle = problems.absorbFlat(path, () => readBundle(schema, slotInput.bundle, path));
+    if (bundle === undefined) {
       continue;
     }
 

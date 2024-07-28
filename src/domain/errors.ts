@@ -146,4 +146,46 @@ export class ProblemCollector {
     }
     throw new ValidationError(summary, { details: this.problems() });
   }
+
+  /**
+   * Runs something that validates, and folds whatever it threw into this
+   * collector rather than letting it escape. Four modules were doing this by
+   * hand, each with a slightly different idea of what to do with the details of
+   * a nested failure, and one of them silently dropped them.
+   *
+   * A nested ValidationError contributes each of its own details under a
+   * prefixed path. Anything else contributes one problem carrying its message,
+   * because a non validation failure is a bug and hiding it would make the bug
+   * look like bad input.
+   */
+  absorb<T>(path: string, run: () => T): T | undefined {
+    try {
+      return run();
+    } catch (error) {
+      if (error instanceof ValidationError && error.details.length > 0) {
+        for (const detail of error.details) {
+          this.add(`${path}.${detail.path}`, detail.message);
+        }
+        return undefined;
+      }
+      this.add(path, (error as Error).message);
+      return undefined;
+    }
+  }
+
+  /** Absorbs under the caller's own path rather than nesting a child path. */
+  absorbFlat<T>(path: string, run: () => T): T | undefined {
+    try {
+      return run();
+    } catch (error) {
+      if (error instanceof ValidationError && error.details.length > 0) {
+        for (const detail of error.details) {
+          this.add(path, `${detail.path} ${detail.message}`);
+        }
+        return undefined;
+      }
+      this.add(path, (error as Error).message);
+      return undefined;
+    }
+  }
 }

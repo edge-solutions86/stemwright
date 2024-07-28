@@ -1,6 +1,6 @@
 import { ProblemCollector } from '../errors.js';
 import type { FeatureBundle } from '../features/bundle.js';
-import { bundleKey, featureBundle } from '../features/bundle.js';
+import { EMPTY_BUNDLE, bundleKey, featureBundle } from '../features/bundle.js';
 import type { FeatureSchema } from '../features/schema.js';
 import type { Id } from '../identifiers.js';
 import { asSlug, derivedId } from '../identifiers.js';
@@ -72,15 +72,9 @@ export function lexeme(context: LexemeContext, input: LexemeInput): Lexeme {
     problems.add('homograph', `must be a positive whole number: ${String(homograph)}`);
   }
 
-  let inherent: FeatureBundle = { pairs: [] };
-  try {
-    inherent = featureBundle(context.schema, input.inherent ?? {});
-  } catch (error) {
-    for (const detail of (error as { details?: { path: string; message: string }[] }).details ??
-      []) {
-      problems.add(`inherent.${detail.path}`, detail.message);
-    }
-  }
+  const inherent =
+    problems.absorb('inherent', () => featureBundle(context.schema, input.inherent ?? {})) ??
+    EMPTY_BUNDLE;
 
   const glosses = (input.glosses ?? []).map((gloss, index) =>
     requireText(`glosses.${index}`, gloss, 200),

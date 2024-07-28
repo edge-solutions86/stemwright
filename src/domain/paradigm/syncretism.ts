@@ -57,18 +57,15 @@ export function syncretismMap(
 
     const members: string[] = [];
     for (const member of input.members) {
-      let canonical: string;
-      try {
-        const bundle = readBundle(schema, member, path);
-        if (!isComplete(schema, bundle)) {
-          problems.add(path, `member does not fix every required dimension: ${member}`);
-          continue;
-        }
-        canonical = bundleKey(bundle);
-      } catch (error) {
-        problems.add(path, (error as Error).message);
+      const bundle = problems.absorbFlat(path, () => readBundle(schema, member, path));
+      if (bundle === undefined) {
         continue;
       }
+      if (!isComplete(schema, bundle)) {
+        problems.add(path, `member does not fix every required dimension: ${member}`);
+        continue;
+      }
+      const canonical = bundleKey(bundle);
       if (members.includes(canonical)) {
         problems.add(path, `lists ${canonical} twice`);
         continue;
