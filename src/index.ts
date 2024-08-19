@@ -24,3 +24,4 @@ export * from './domain/ortho/compare.js';
 export * from './domain/drill/deck.js';
 export * from './domain/paradigm/book.js';
 export * from './domain/drill/membership.js';
+export * from './domain/drill/policy.js';
