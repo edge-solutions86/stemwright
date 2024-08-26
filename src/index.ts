@@ -26,3 +26,4 @@ export * from './domain/paradigm/book.js';
 export * from './domain/drill/membership.js';
 export * from './domain/drill/policy.js';
 export * from './domain/mastery/ladder.js';
+export * from './domain/mastery/strength.js';
