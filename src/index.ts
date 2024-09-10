@@ -29,3 +29,4 @@ export * from './domain/mastery/ladder.js';
 export * from './domain/mastery/strength.js';
 export * from './domain/mastery/ledger.js';
 export * from './domain/drill/burial.js';
+export * from './domain/drill/queue.js';
