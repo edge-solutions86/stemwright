@@ -33,3 +33,4 @@ export * from './domain/drill/queue.js';
 export * from './domain/mastery/attempt.js';
 export * from './domain/mastery/credit.js';
 export * from './domain/mastery/leech.js';
+export * from './domain/mastery/shield.js';
