@@ -21,7 +21,7 @@ import type { RuleSet } from '../paradigm/realise.js';
 import { realise } from '../paradigm/realise.js';
 import type { CivilDate } from '../time/civil.js';
 import type { BurialSet } from './burial.js';
-import { NOTHING_BURIED, buryCell, twinCellsOf } from './burial.js';
+import { buryCell, twinCellsOf } from './burial.js';
 import type { DrillContext } from './membership.js';
 
 /**
@@ -162,8 +162,4 @@ export function reviewAnswer(
     twinsCredited,
     leechFired: leech.outcome.fired,
   };
-}
-
-export function startSession(): BurialSet {
-  return NOTHING_BURIED;
 }
