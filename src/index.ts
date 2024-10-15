@@ -37,3 +37,4 @@ export * from './domain/mastery/shield.js';
 export * from './domain/drill/review.js';
 export * from './domain/drill/session.js';
 export * from './domain/report/coverage.js';
+export * from './domain/report/forecast.js';
