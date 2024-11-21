@@ -42,3 +42,4 @@ export * from './domain/report/rollup.js';
 export * from './domain/course/course.js';
 export * from './domain/course/enrolment.js';
 export * from './domain/course/assignment.js';
+export * from './domain/course/progress.js';
