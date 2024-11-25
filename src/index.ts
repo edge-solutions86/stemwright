@@ -43,3 +43,4 @@ export * from './domain/course/course.js';
 export * from './domain/course/enrolment.js';
 export * from './domain/course/assignment.js';
 export * from './domain/course/progress.js';
+export * from './domain/course/authz.js';
