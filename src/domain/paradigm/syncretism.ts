@@ -1,3 +1,4 @@
+import { groupBy } from '../collections.js';
 import { ProblemCollector } from '../errors.js';
 import { bundleKey, isComplete } from '../features/bundle.js';
 import type { FeatureSchema } from '../features/schema.js';
@@ -129,27 +130,18 @@ export function syncreticBundles(map: SyncretismMap): string[] {
  * nobody declared anything.
  */
 export function derivedSyncretism(profile: ParadigmProfile): SyncretismMap {
-  const buckets = new Map<string, string[]>();
-  for (const slot of profile.slots.values()) {
-    const signature =
-      slot.literal === undefined
-        ? `affix:${slot.stemRole}:${slot.affix}`
-        : `literal:${slot.literal}`;
-    const existing = buckets.get(signature);
-    if (existing === undefined) {
-      buckets.set(signature, [slot.bundle]);
-    } else {
-      existing.push(slot.bundle);
-    }
-  }
+  const buckets = groupBy(profile.slots.values(), (slot) =>
+    slot.literal === undefined ? `affix:${slot.stemRole}:${slot.affix}` : `literal:${slot.literal}`,
+  );
 
   const groups: SyncretismGroup[] = [];
   const byBundle = new Map<string, string>();
   let index = 0;
-  for (const members of buckets.values()) {
-    if (members.length < 2) {
+  for (const slots of buckets.values()) {
+    if (slots.length < 2) {
       continue;
     }
+    const members = slots.map((slot) => slot.bundle);
     index += 1;
     const key = `derived-${index}`;
     groups.push({ key, members, note: undefined });

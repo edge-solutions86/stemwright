@@ -1,3 +1,4 @@
+import { groupBy } from '../collections.js';
 import { ProblemCollector, ValidationError } from '../errors.js';
 import type { FeatureBundle } from '../features/bundle.js';
 import { bundleKey } from '../features/bundle.js';
@@ -179,18 +180,14 @@ export function collidingForms(
   entry: Lexeme,
   profile: ParadigmProfile,
 ): ReadonlyMap<string, string[]> {
+  const grouped = groupBy(realiseAll(rules, entry, profile), (realised) => realised.form);
   const byForm = new Map<string, string[]>();
-  for (const realised of realiseAll(rules, entry, profile)) {
-    const existing = byForm.get(realised.form);
-    if (existing === undefined) {
-      byForm.set(realised.form, [realised.bundle]);
-    } else {
-      existing.push(realised.bundle);
-    }
-  }
-  for (const [form, bundles] of [...byForm.entries()]) {
-    if (bundles.length < 2) {
-      byForm.delete(form);
+  for (const [form, realised] of grouped) {
+    if (realised.length > 1) {
+      byForm.set(
+        form,
+        realised.map((cell) => cell.bundle),
+      );
     }
   }
   return byForm;

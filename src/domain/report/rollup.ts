@@ -1,3 +1,4 @@
+import { groupBy } from '../collections.js';
 import type { Attempt, AttemptTally } from '../mastery/attempt.js';
 import { accuracyOf, tally, wasCorrect } from '../mastery/attempt.js';
 import type { CivilDate } from '../time/civil.js';
@@ -22,18 +23,10 @@ export interface DayRollup {
 }
 
 export function dailyRollup(attempts: readonly Attempt[], range: DayRange): DayRollup[] {
-  const byDay = new Map<string, Attempt[]>();
-  for (const entry of attempts) {
-    if (!rangeContains(range, entry.on)) {
-      continue;
-    }
-    const existing = byDay.get(entry.on);
-    if (existing === undefined) {
-      byDay.set(entry.on, [entry]);
-    } else {
-      existing.push(entry);
-    }
-  }
+  const byDay = groupBy(
+    attempts.filter((entry) => rangeContains(range, entry.on)),
+    (entry) => entry.on,
+  );
 
   const rollups: DayRollup[] = [];
   for (const day of eachDay(range)) {
@@ -58,15 +51,7 @@ export interface CellRollup {
 }
 
 export function cellRollup(attempts: readonly Attempt[]): CellRollup[] {
-  const byCell = new Map<string, Attempt[]>();
-  for (const entry of attempts) {
-    const existing = byCell.get(entry.cellId);
-    if (existing === undefined) {
-      byCell.set(entry.cellId, [entry]);
-    } else {
-      existing.push(entry);
-    }
-  }
+  const byCell = groupBy(attempts, (entry) => entry.cellId);
 
   return [...byCell.entries()]
     .map(([cellId, forCell]) => {
@@ -109,15 +94,7 @@ export interface DeckRollup {
 }
 
 export function deckRollup(attempts: readonly Attempt[]): DeckRollup[] {
-  const byDeck = new Map<string, Attempt[]>();
-  for (const entry of attempts) {
-    const existing = byDeck.get(entry.deckKey);
-    if (existing === undefined) {
-      byDeck.set(entry.deckKey, [entry]);
-    } else {
-      existing.push(entry);
-    }
-  }
+  const byDeck = groupBy(attempts, (entry) => entry.deckKey);
 
   return [...byDeck.entries()]
     .map(([deckKey, forDeck]) => {

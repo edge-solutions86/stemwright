@@ -1,3 +1,4 @@
+import { groupSorted } from '../collections.js';
 import { ConflictError, NotFoundError } from '../errors.js';
 import type { Id } from '../identifiers.js';
 import type { ClassRegistry } from './inflection-class.js';
@@ -19,44 +20,32 @@ export interface Lexicon {
   readonly byTag: ReadonlyMap<string, readonly Lexeme[]>;
 }
 
-function push<T>(index: Map<string, T[]>, key: string, value: T): void {
-  const existing = index.get(key);
-  if (existing === undefined) {
-    index.set(key, [value]);
-  } else {
-    existing.push(value);
-  }
-}
-
 export function buildLexicon(language: string, entries: readonly Lexeme[]): Lexicon {
   const byId = new Map<string, Lexeme>();
-  const byLemma = new Map<string, Lexeme[]>();
-  const byClass = new Map<string, Lexeme[]>();
-  const byTag = new Map<string, Lexeme[]>();
-
   for (const entry of entries) {
     if (byId.has(entry.id)) {
       throw new ConflictError(`lexeme ${entry.id} appears twice in the lexicon`);
     }
     byId.set(entry.id, entry);
-    push(byLemma, entry.lemma.toLowerCase(), entry);
-    push(byClass, entry.classKey, entry);
-    for (const tag of entry.tags) {
-      push(byTag, tag, entry);
-    }
   }
 
-  for (const bucket of byLemma.values()) {
-    bucket.sort(compareLexemes);
-  }
-  for (const bucket of byClass.values()) {
-    bucket.sort(compareLexemes);
-  }
-  for (const bucket of byTag.values()) {
-    bucket.sort(compareLexemes);
-  }
+  const tagged = entries.flatMap((entry) => entry.tags.map((tag) => ({ tag, entry })));
 
-  return { language, byId, byLemma, byClass, byTag };
+  return {
+    language,
+    byId,
+    byLemma: groupSorted(entries, (entry) => entry.lemma.toLowerCase(), compareLexemes),
+    byClass: groupSorted(entries, (entry) => entry.classKey, compareLexemes),
+    byTag: new Map(
+      [
+        ...groupSorted(
+          tagged,
+          (row) => row.tag,
+          (a, b) => compareLexemes(a.entry, b.entry),
+        ),
+      ].map(([tag, rows]) => [tag, rows.map((row) => row.entry)]),
+    ),
+  };
 }
 
 export function emptyLexicon(language: string): Lexicon {

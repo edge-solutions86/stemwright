@@ -1,3 +1,4 @@
+import { groupBy } from '../collections.js';
 import { parseBundleKey } from '../features/bundle.js';
 import type { FeatureSchema } from '../features/schema.js';
 import { matchesSelector } from '../features/selector.js';
@@ -147,16 +148,7 @@ export function membershipWarnings(membership: Membership): string[] {
 }
 
 export function cellsByLexeme(membership: Membership): ReadonlyMap<string, Cell[]> {
-  const index = new Map<string, Cell[]>();
-  for (const cell of membership.cells) {
-    const existing = index.get(cell.lexemeId);
-    if (existing === undefined) {
-      index.set(cell.lexemeId, [cell]);
-    } else {
-      existing.push(cell);
-    }
-  }
-  return index;
+  return groupBy(membership.cells, (cell) => cell.lexemeId);
 }
 
 export function bundlesCovered(membership: Membership): string[] {
