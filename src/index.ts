@@ -46,3 +46,4 @@ export * from './domain/course/progress.js';
 export * from './domain/course/authz.js';
 export * from './domain/report/cohort.js';
 export * from './domain/collections.js';
+export * from './app/events.js';
