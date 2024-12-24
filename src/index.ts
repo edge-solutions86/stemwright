@@ -47,3 +47,4 @@ export * from './domain/course/authz.js';
 export * from './domain/report/cohort.js';
 export * from './domain/collections.js';
 export * from './app/events.js';
+export * from './app/services/lexicon-service.js';
