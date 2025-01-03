@@ -49,3 +49,4 @@ export * from './domain/collections.js';
 export * from './app/events.js';
 export * from './app/services/lexicon-service.js';
 export * from './app/services/profile-service.js';
+export * from './app/services/drill-service.js';
