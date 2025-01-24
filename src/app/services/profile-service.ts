@@ -23,6 +23,7 @@ import type { CivilDate } from '../../domain/time/civil.js';
 import { compareCivil } from '../../domain/time/civil.js';
 import type { DayRange } from '../../domain/time/window.js';
 import type { EventBus } from '../events.js';
+import { requireBook, requireLanguage } from '../loaders.js';
 import type { Clock, Stores } from '../ports.js';
 
 /**
@@ -53,13 +54,7 @@ export interface ProfileService {
 }
 
 export function createProfileService(stores: Stores, bus: EventBus, clock: Clock): ProfileService {
-  const loadBook = async (language: string): Promise<ProfileBook> => {
-    const found = await stores.books.get(language);
-    if (found === undefined) {
-      throw new NotFoundError('profile book', language);
-    }
-    return found;
-  };
+  const loadBook = (language: string): Promise<ProfileBook> => requireBook(stores, language);
 
   const loadHistory = async (language: string, profileKey: string): Promise<RevisionHistory> => {
     const book = await loadBook(language);
@@ -70,13 +65,7 @@ export function createProfileService(stores: Stores, bus: EventBus, clock: Clock
     return found;
   };
 
-  const loadLanguage = async (language: string) => {
-    const bundle = await stores.languages.get(language);
-    if (bundle === undefined) {
-      throw new NotFoundError('language', language);
-    }
-    return bundle;
-  };
+  const loadLanguage = (language: string) => requireLanguage(stores, language);
 
   return {
     book: loadBook,

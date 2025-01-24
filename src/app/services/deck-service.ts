@@ -7,6 +7,7 @@ import { resolveMembership } from '../../domain/drill/membership.js';
 import type { Membership } from '../../domain/drill/membership.js';
 import { membershipWarnings } from '../../domain/drill/membership.js';
 import type { CivilDate } from '../../domain/time/civil.js';
+import { requireLanguage } from '../loaders.js';
 import type { Clock, Stores } from '../ports.js';
 import type { DrillService } from './drill-service.js';
 
@@ -41,13 +42,7 @@ export interface DeckService {
 }
 
 export function createDeckService(stores: Stores, clock: Clock, drill: DrillService): DeckService {
-  const schemaOf = async (language: string) => {
-    const bundle = await stores.languages.get(language);
-    if (bundle === undefined) {
-      throw new NotFoundError('language', language);
-    }
-    return bundle.schema;
-  };
+  const schemaOf = async (language: string) => (await requireLanguage(stores, language)).schema;
 
   const previewOf = async (
     language: string,

@@ -5,14 +5,8 @@ import type { Actor, CourseScope } from '../../domain/course/authz.js';
 import { require as requirePermission, requireReadLearner } from '../../domain/course/authz.js';
 import type { Course, CourseInput } from '../../domain/course/course.js';
 import { course } from '../../domain/course/course.js';
-import type { Enrolment, EnrolmentInput, Roster } from '../../domain/course/enrolment.js';
-import {
-  enrol,
-  enrolmentOf,
-  gradedLearners,
-  roster,
-  withdraw,
-} from '../../domain/course/enrolment.js';
+import type { Enrolment, EnrolmentInput } from '../../domain/course/enrolment.js';
+import { enrol, enrolmentOf, gradedLearners, withdraw } from '../../domain/course/enrolment.js';
 import type { AssignmentProgress } from '../../domain/course/progress.js';
 import { assignmentProgress } from '../../domain/course/progress.js';
 import type { Ladder } from '../../domain/mastery/ladder.js';
@@ -20,6 +14,7 @@ import { STANDARD_LADDER } from '../../domain/mastery/ladder.js';
 import { emptyLedger } from '../../domain/mastery/ledger.js';
 import type { CivilDate } from '../../domain/time/civil.js';
 import type { EventBus } from '../events.js';
+import { requireCourse, requireLanguage, requireScope } from '../loaders.js';
 import type { Clock, Stores } from '../ports.js';
 import type { DrillService } from './drill-service.js';
 
@@ -60,21 +55,8 @@ export function createCourseService(
   clock: Clock,
   drill: DrillService,
 ): CourseService {
-  const loadCourse = async (key: string): Promise<Course> => {
-    const found = await stores.courses.get(key);
-    if (found === undefined) {
-      throw new NotFoundError('course', key);
-    }
-    return found;
-  };
-
-  const loadRoster = async (entry: Course): Promise<Roster> =>
-    roster(entry, await stores.courses.enrolments(entry.key));
-
-  const scopeOf = async (courseKey: string): Promise<CourseScope> => {
-    const entry = await loadCourse(courseKey);
-    return { course: entry, roster: await loadRoster(entry) };
-  };
+  const loadCourse = (key: string): Promise<Course> => requireCourse(stores, key);
+  const scopeOf = (courseKey: string): Promise<CourseScope> => requireScope(stores, courseKey);
 
   const loadAssignment = async (courseKey: string, key: string): Promise<Assignment> => {
     const found = (await stores.courses.assignments(courseKey)).find((row) => row.key === key);
@@ -137,10 +119,7 @@ export function createCourseService(
     async addAssignment(actor, courseKey, input) {
       const scope = await scopeOf(courseKey);
       requirePermission(actor, 'edit-course', scope);
-      const bundle = await stores.languages.get(scope.course.language);
-      if (bundle === undefined) {
-        throw new NotFoundError('language', scope.course.language);
-      }
+      const bundle = await requireLanguage(stores, scope.course.language);
       const built = assignment(bundle.schema, scope.course, input);
       await stores.courses.putAssignment(built);
       return built;

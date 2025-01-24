@@ -7,6 +7,7 @@ import type { Lexicon } from '../../domain/lexicon/lexicon.js';
 import { buildLexicon, lexemesByTag, lexemesUnderClass } from '../../domain/lexicon/lexicon.js';
 import { normaliseInput } from '../../domain/text/normalise.js';
 import type { EventBus } from '../events.js';
+import { requireLanguage } from '../loaders.js';
 import type { Clock, LanguageBundle, Stores } from '../ports.js';
 
 /**
@@ -32,13 +33,7 @@ export interface LexiconService {
 }
 
 export function createLexiconService(stores: Stores, bus: EventBus, clock: Clock): LexiconService {
-  const language = async (name: string): Promise<LanguageBundle> => {
-    const bundle = await stores.languages.get(name);
-    if (bundle === undefined) {
-      throw new NotFoundError('language', name);
-    }
-    return bundle;
-  };
+  const language = (name: string): Promise<LanguageBundle> => requireLanguage(stores, name);
 
   const load = async (name: string): Promise<Lexicon> =>
     buildLexicon(name, await stores.lexemes.listByLanguage(name));

@@ -16,7 +16,6 @@ import {
   recordAttempt,
   summarise,
 } from '../../domain/drill/session.js';
-import { buildLexicon } from '../../domain/lexicon/lexicon.js';
 import type { Ladder } from '../../domain/mastery/ladder.js';
 import { STANDARD_LADDER } from '../../domain/mastery/ladder.js';
 import type { LeechPolicy } from '../../domain/mastery/leech.js';
@@ -25,6 +24,7 @@ import { emptyLedger, strengthFor } from '../../domain/mastery/ledger.js';
 import type { Cell } from '../../domain/paradigm/cell.js';
 import type { CivilDate } from '../../domain/time/civil.js';
 import type { EventBus } from '../events.js';
+import { loadContext as loadDrillContext, requireDeck, requireLanguage } from '../loaders.js';
 import type { Clock, Stores } from '../ports.js';
 
 /**
@@ -78,30 +78,10 @@ function resolvePolicy(settings: DrillSettings | undefined): DrillPolicy {
 }
 
 export function createDrillService(stores: Stores, bus: EventBus, clock: Clock): DrillService {
-  const loadContext = async (language: string): Promise<DrillContext> => {
-    const bundle = await stores.languages.get(language);
-    if (bundle === undefined) {
-      throw new NotFoundError('language', language);
-    }
-    const book = await stores.books.get(language);
-    if (book === undefined) {
-      throw new NotFoundError('profile book', language);
-    }
-    return {
-      schema: bundle.schema,
-      classes: bundle.classes,
-      book,
-      lexicon: buildLexicon(language, await stores.lexemes.listByLanguage(language)),
-    };
-  };
-
-  const loadDeck = async (language: string, key: string): Promise<Deck> => {
-    const found = await stores.decks.get(language, key);
-    if (found === undefined) {
-      throw new NotFoundError('deck', `${language}/${key}`);
-    }
-    return found;
-  };
+  const loadContext = (language: string): Promise<DrillContext> =>
+    loadDrillContext(stores, language);
+  const loadDeck = (language: string, key: string): Promise<Deck> =>
+    requireDeck(stores, language, key);
 
   const loadMembership = async (language: string, deckKey: string, on: CivilDate) =>
     resolveMembership(await loadContext(language), await loadDeck(language, deckKey), on);
@@ -110,10 +90,7 @@ export function createDrillService(stores: Stores, bus: EventBus, clock: Clock):
     language: string,
     settings: DrillSettings | undefined,
   ): Promise<ReviewSettings> => {
-    const bundle = await stores.languages.get(language);
-    if (bundle === undefined) {
-      throw new NotFoundError('language', language);
-    }
+    const bundle = await requireLanguage(stores, language);
     return {
       ortho: bundle.ortho,
       rules: bundle.rules,
