@@ -126,6 +126,7 @@ describe('a handler that throws', () => {
   it('wraps a thrown non error', () => {
     const bus = createEventBus();
     bus.onAny(() => {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
       throw 'a string';
     });
     expect(bus.publish(lexemeAdded)[0]?.message).toBe('a string');
