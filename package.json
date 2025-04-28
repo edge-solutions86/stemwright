@@ -1,6 +1,6 @@
 {
   "name": "stemwright",
-  "version": "0.4.0",
+  "version": "0.6.0",
   "private": true,
   "description": "A drill desk for inflectional paradigms",
   "type": "module",
@@ -15,7 +15,10 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "start": "node dist/bin/serve.js",
+    "cli": "tsx src/bin/stemwright.ts",
+    "dev": "tsx watch src/bin/serve.ts"
   },
   "devDependencies": {
     "@eslint/js": "9.19.0",
@@ -27,5 +30,21 @@
     "typescript": "5.7.3",
     "typescript-eslint": "8.23.0",
     "vitest": "3.0.5"
-  }
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "stemwright": "dist/bin/stemwright.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ]
 }
