@@ -7,7 +7,8 @@ import { formatFlags, parseArgs } from './args.js';
  *
  * A command returns its output rather than printing it, and the exit code comes
  * from whether it threw. That is what makes every command testable without
- * capturing a stream, and it is why nothing below this line calls console.
+ * capturing a stream, and it is why nothing below this line writes to a stream
+ * of its own.
  */
 export interface CommandContext {
   readonly write: (line: string) => void;

@@ -62,10 +62,18 @@ export function kindOf(value: string): IdKind | undefined {
  * the lexeme and the bundle rather than allocated, which keeps a re expanded
  * paradigm stable across runs and makes journal replay idempotent.
  */
+/**
+ * The separator between the parts of a digest. It is a real character rather
+ * than an empty string so that `digest('ab', 'c')` and `digest('a', 'bc')`
+ * cannot collide, and it is named here rather than typed inline because it is
+ * invisible in an editor and was once pasted in by accident.
+ */
+const PART_SEPARATOR = String.fromCodePoint(0x1f);
+
 export function digest(...parts: readonly string[]): string {
   let h1 = 0x811c9dc5;
   let h2 = 0x01000193;
-  const joined = parts.join('');
+  const joined = parts.join(PART_SEPARATOR);
   for (let i = 0; i < joined.length; i += 1) {
     const c = joined.charCodeAt(i);
     h1 = Math.imul(h1 ^ c, 0x01000193) >>> 0;
