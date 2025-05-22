@@ -58,11 +58,6 @@ export function kindOf(value: string): IdKind | undefined {
 }
 
 /**
- * A small non cryptographic hash. It exists so a cell id can be derived from
- * the lexeme and the bundle rather than allocated, which keeps a re expanded
- * paradigm stable across runs and makes journal replay idempotent.
- */
-/**
  * The separator between the parts of a digest. It is a real character rather
  * than an empty string so that `digest('ab', 'c')` and `digest('a', 'bc')`
  * cannot collide, and it is named here rather than typed inline because it is
@@ -70,6 +65,11 @@ export function kindOf(value: string): IdKind | undefined {
  */
 const PART_SEPARATOR = String.fromCodePoint(0x1f);
 
+/**
+ * A small non cryptographic hash. It exists so a cell id can be derived from
+ * the lexeme and the bundle rather than allocated, which keeps a re expanded
+ * paradigm stable across runs and makes journal replay idempotent.
+ */
 export function digest(...parts: readonly string[]): string {
   let h1 = 0x811c9dc5;
   let h2 = 0x01000193;
