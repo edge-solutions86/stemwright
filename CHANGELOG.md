@@ -18,3 +18,11 @@
 - The course layer: courses, enrolments, assignments, progress, authorisation.
 - Reporting over coverage, forecasts, rollups and cohorts.
 - Application ports with map backed stores behind them.
+
+### Added
+
+- Continuous integration: format, lint, types and build on one job, the suite on
+  three cells (ubuntu on node 20 and 22, windows on node 22), and coverage with
+  an artifact.
+- Coverage thresholds enforced in `vitest.config.ts`, set just under what the
+  suite reaches so a regression fails the build.
