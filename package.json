@@ -19,7 +19,8 @@
     "start": "node dist/bin/serve.js",
     "cli": "tsx src/bin/stemwright.ts",
     "dev": "tsx watch src/bin/serve.ts",
-    "verify": "node scripts/verify.mjs"
+    "verify": "node scripts/verify.mjs",
+    "test:perf": "vitest run --config vitest.perf.config.ts"
   },
   "devDependencies": {
     "@eslint/js": "9.19.0",

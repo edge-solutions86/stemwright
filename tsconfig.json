@@ -27,6 +27,7 @@
     "tests/**/*.ts",
     "scripts/**/*.mjs",
     "scripts/**/*.d.mts",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "vitest.perf.config.ts"
   ]
 }
