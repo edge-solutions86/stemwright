@@ -56,3 +56,4 @@ export * from './app/services/report-service.js';
 export * from './app/loaders.js';
 export * from './app/application.js';
 export * from './domain/course/preferences.js';
+export * from './domain/report/deck-stats.js';
