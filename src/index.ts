@@ -57,3 +57,4 @@ export * from './app/loaders.js';
 export * from './app/application.js';
 export * from './domain/course/preferences.js';
 export * from './domain/report/deck-stats.js';
+export * from './domain/lexicon/diff.js';
