@@ -59,3 +59,4 @@ export * from './domain/course/preferences.js';
 export * from './domain/report/deck-stats.js';
 export * from './domain/lexicon/diff.js';
 export * from './domain/ortho/transliteration.js';
+export * from './domain/ortho/hint.js';
