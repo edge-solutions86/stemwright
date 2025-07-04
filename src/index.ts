@@ -60,3 +60,4 @@ export * from './domain/report/deck-stats.js';
 export * from './domain/lexicon/diff.js';
 export * from './domain/ortho/transliteration.js';
 export * from './domain/ortho/hint.js';
+export * from './app/audit.js';
