@@ -33,13 +33,14 @@ const build = async () => {
 };
 
 describe('the command table', () => {
-  it('declares four commands', async () => {
+  it('declares five commands', async () => {
     const { program } = await build();
     expect(program.commands.map((command) => command.name).sort()).toEqual([
       'coverage',
       'lexemes',
       'paradigm',
       'queue',
+      'routes',
     ]);
   });
 
@@ -186,5 +187,26 @@ describe('lexemes', () => {
     const { program } = await build();
     const result = await run(program, ['lexemes', '--language', 'greek'], context);
     expect(result.code).toBe(EXIT_FAILED);
+  });
+});
+
+describe('routes', () => {
+  it('lists the http routes the build serves', async () => {
+    const { program } = await build();
+    const result = await run(program, ['routes'], context);
+    expect(result.code).toBe(EXIT_OK);
+    expect(result.output).toContain('method');
+    expect(result.output).toContain('/health');
+    expect(result.output).toContain('/queue');
+  });
+
+  it('needs no arguments', async () => {
+    const { program } = await build();
+    expect((await run(program, ['routes', '--nonsense'], context)).code).toBe(EXIT_MISUSED);
+  });
+
+  it('is one of the declared commands', async () => {
+    const { program } = await build();
+    expect(program.commands.map((command) => command.name)).toContain('routes');
   });
 });

@@ -9,6 +9,7 @@ import { profileFor } from '../domain/paradigm/book.js';
 import { buildTable, tableToText } from '../domain/paradigm/table.js';
 import { coverageByBundle, maturityOf, weakestRows } from '../domain/report/coverage.js';
 import { parseCivilDate } from '../domain/time/civil.js';
+import { routeTable } from '../http/api.js';
 import { requireFlag, stringFlag } from './args.js';
 import type { Command } from './program.js';
 import { bar, keyValues, percent, table } from './render.js';
@@ -167,6 +168,38 @@ export function lexemesCommand(app: Application): Command {
   };
 }
 
+/**
+ * Prints what the library exports and what the http layer serves, so an
+ * operator can see the surface of a running build without reading its source.
+ */
+export function routesCommand(app: Application): Command {
+  return {
+    name: 'routes',
+    describe: 'list the http routes this build serves',
+    usage: 'stemwright routes',
+    flags: {},
+    run() {
+      const directory = { resolve: () => Promise.resolve(undefined) };
+      const lines = routeTable(app, { directory });
+      return Promise.resolve(
+        table(
+          [{ header: 'method' }, { header: 'path' }],
+          lines.map((line) => {
+            const space = line.indexOf(' ');
+            return [line.slice(0, space), line.slice(space + 1)];
+          }),
+        ),
+      );
+    },
+  };
+}
+
 export function allCommands(app: Application): Command[] {
-  return [queueCommand(app), paradigmCommand(app), coverageCommand(app), lexemesCommand(app)];
+  return [
+    queueCommand(app),
+    paradigmCommand(app),
+    coverageCommand(app),
+    lexemesCommand(app),
+    routesCommand(app),
+  ];
 }

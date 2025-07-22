@@ -19,8 +19,8 @@ describe('buildProgram', () => {
     expect(program.version).toBe(VERSION);
   });
 
-  it('carries the four commands', () => {
-    expect(buildProgram().commands).toHaveLength(4);
+  it('carries the five commands', () => {
+    expect(buildProgram().commands).toHaveLength(5);
   });
 });
 
