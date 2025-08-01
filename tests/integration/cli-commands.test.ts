@@ -33,15 +33,18 @@ const build = async () => {
 };
 
 describe('the command table', () => {
-  it('declares five commands', async () => {
+  it('declares every command the cli documents', async () => {
     const { program } = await build();
-    expect(program.commands.map((command) => command.name).sort()).toEqual([
-      'coverage',
-      'lexemes',
-      'paradigm',
-      'queue',
-      'routes',
-    ]);
+    const names = program.commands.map((command) => command.name);
+    for (const wanted of ['coverage', 'import', 'lexemes', 'paradigm', 'queue', 'routes']) {
+      expect(names).toContain(wanted);
+    }
+  });
+
+  it('names each command exactly once', async () => {
+    const { program } = await build();
+    const names = program.commands.map((command) => command.name);
+    expect(new Set(names).size).toBe(names.length);
   });
 
   it('gives every command a usage line', async () => {

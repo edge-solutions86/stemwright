@@ -10,6 +10,7 @@ import { buildTable, tableToText } from '../domain/paradigm/table.js';
 import { coverageByBundle, maturityOf, weakestRows } from '../domain/report/coverage.js';
 import { parseCivilDate } from '../domain/time/civil.js';
 import { routeTable } from '../http/api.js';
+import { importCommand } from './import-command.js';
 import { requireFlag, stringFlag } from './args.js';
 import type { Command } from './program.js';
 import { bar, keyValues, percent, table } from './render.js';
@@ -201,5 +202,6 @@ export function allCommands(app: Application): Command[] {
     coverageCommand(app),
     lexemesCommand(app),
     routesCommand(app),
+    importCommand(app),
   ];
 }
