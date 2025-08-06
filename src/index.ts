@@ -63,3 +63,4 @@ export * from './domain/ortho/hint.js';
 export * from './app/audit.js';
 export * from './app/config.js';
 export * from './http/rate-limit.js';
+export * from './io/lexicon-export.js';
