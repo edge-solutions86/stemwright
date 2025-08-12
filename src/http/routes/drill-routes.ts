@@ -1,14 +1,12 @@
-import { ValidationError } from '../../domain/errors.js';
 import { require as requirePermission } from '../../domain/course/authz.js';
 import type { CourseScope } from '../../domain/course/authz.js';
 import { queueCells } from '../../domain/drill/queue.js';
 import { summarise } from '../../domain/drill/session.js';
-import type { CivilDate } from '../../domain/time/civil.js';
-import { parseCivilDate } from '../../domain/time/civil.js';
 import type { Json } from '../../infra/codec.js';
 import { readString, requireObject } from '../../infra/codec.js';
 import type { AccountDirectory, AuthedRequest } from '../auth.js';
 import { withActor } from '../auth.js';
+import { dayFrom, requireCourseKey } from '../query.js';
 import type { Route } from '../router.js';
 import { json, route } from '../router.js';
 import type { DrillService } from '../../app/services/drill-service.js';
@@ -28,23 +26,10 @@ export interface DrillRouteDeps {
   readonly scopeOf: (courseKey: string) => Promise<CourseScope>;
 }
 
-function dayFrom(query: Readonly<Record<string, string>>): CivilDate | undefined {
-  const value = query['on'];
-  return value === undefined ? undefined : parseCivilDate(value, 'on');
-}
-
-function courseKeyOf(query: Readonly<Record<string, string>>): string {
-  const value = query['course'];
-  if (value === undefined || value === '') {
-    throw ValidationError.field('course', 'must be given so permissions can be checked');
-  }
-  return value;
-}
-
 export function drillRoutes(deps: DrillRouteDeps): Route[] {
   const queue = async (request: AuthedRequest) => {
     const learnerId = request.params['learnerId']!;
-    const scope = await deps.scopeOf(courseKeyOf(request.query));
+    const scope = await deps.scopeOf(requireCourseKey(request.query));
     requirePermission(request.actor, 'drill', scope);
 
     const built = await deps.drill.queue(
@@ -68,7 +53,7 @@ export function drillRoutes(deps: DrillRouteDeps): Route[] {
 
   const answer = async (request: AuthedRequest) => {
     const learnerId = request.params['learnerId']!;
-    const scope = await deps.scopeOf(courseKeyOf(request.query));
+    const scope = await deps.scopeOf(requireCourseKey(request.query));
     requirePermission(request.actor, 'drill', scope);
 
     const body = requireObject('body', request.body);
@@ -94,7 +79,7 @@ export function drillRoutes(deps: DrillRouteDeps): Route[] {
 
   const finish = async (request: AuthedRequest) => {
     const learnerId = request.params['learnerId']!;
-    const scope = await deps.scopeOf(courseKeyOf(request.query));
+    const scope = await deps.scopeOf(requireCourseKey(request.query));
     requirePermission(request.actor, 'drill', scope);
 
     const closed = await deps.drill.finish(learnerId, request.params['sessionId']!);

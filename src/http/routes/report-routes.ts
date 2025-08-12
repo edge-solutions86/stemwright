@@ -1,11 +1,8 @@
-import { ValidationError } from '../../domain/errors.js';
 import type { CourseScope } from '../../domain/course/authz.js';
 import { maturityOf } from '../../domain/report/coverage.js';
-import { parseCivilDate } from '../../domain/time/civil.js';
-import type { DayRange } from '../../domain/time/window.js';
-import { dayRange } from '../../domain/time/window.js';
 import type { AccountDirectory, AuthedRequest } from '../auth.js';
 import { withActor } from '../auth.js';
+import { rangeFrom, requireCourseKey } from '../query.js';
 import type { Route } from '../router.js';
 import { json, route } from '../router.js';
 import type { ReportService } from '../../app/services/report-service.js';
@@ -22,26 +19,9 @@ export interface ReportRouteDeps {
   readonly scopeOf: (courseKey: string) => Promise<CourseScope>;
 }
 
-export function rangeFrom(query: Readonly<Record<string, string>>): DayRange {
-  const from = query['from'];
-  const to = query['to'];
-  if (from === undefined || to === undefined) {
-    throw ValidationError.field('range', 'needs both a from and a to day');
-  }
-  return dayRange(parseCivilDate(from, 'from'), parseCivilDate(to, 'to'));
-}
-
-function courseKeyOf(query: Readonly<Record<string, string>>): string {
-  const value = query['course'];
-  if (value === undefined || value === '') {
-    throw ValidationError.field('course', 'must be given so permissions can be checked');
-  }
-  return value;
-}
-
 export function reportRoutes(deps: ReportRouteDeps): Route[] {
   const coverage = async (request: AuthedRequest) => {
-    const scope = await deps.scopeOf(courseKeyOf(request.query));
+    const scope = await deps.scopeOf(requireCourseKey(request.query));
     const report = await deps.reports.learner(
       request.actor,
       scope,
@@ -67,7 +47,7 @@ export function reportRoutes(deps: ReportRouteDeps): Route[] {
   };
 
   const activity = async (request: AuthedRequest) => {
-    const scope = await deps.scopeOf(courseKeyOf(request.query));
+    const scope = await deps.scopeOf(requireCourseKey(request.query));
     const report = await deps.reports.activity(
       request.actor,
       scope,
