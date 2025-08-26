@@ -22,7 +22,8 @@
     "verify": "node scripts/verify.mjs",
     "test:perf": "vitest run --config vitest.perf.config.ts",
     "docs": "node scripts/surface.mjs",
-    "docs:check": "node scripts/surface.mjs check"
+    "docs:check": "node scripts/surface.mjs check",
+    "release:check": "node scripts/release.mjs"
   },
   "devDependencies": {
     "@eslint/js": "9.19.0",
