@@ -64,3 +64,4 @@ export * from './app/audit.js';
 export * from './app/config.js';
 export * from './http/rate-limit.js';
 export * from './io/lexicon-export.js';
+export * from './domain/drill/resume.js';
