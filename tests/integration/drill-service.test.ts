@@ -159,3 +159,67 @@ describe('finish', () => {
     await expect(service.finish('lrn_one', 'sess_zzzzzz')).rejects.toThrow(NotFoundError);
   });
 });
+
+describe('resuming', () => {
+  it('reports that there is nothing to resume', async () => {
+    const { service } = await build();
+    const plan = await service.resumePlan('lrn_one', 'all', DAY);
+    expect(plan.action).toBe('open');
+    expect(plan.answered).toBe(0);
+  });
+
+  it('reports a session from today as resumable', async () => {
+    const { service } = await build();
+    const queue = await service.queue('lrn_one', 'latin', 'all', DAY, settings);
+    await service.answer(ask(queue.entries[0]!.cell.id, 'x'), settings);
+    const plan = await service.resumePlan('lrn_one', 'all', DAY);
+    expect(plan.action).toBe('resume');
+    expect(plan.answered).toBe(1);
+  });
+
+  it('answers into the same session on the same day', async () => {
+    const { service } = await build();
+    const queue = await service.queue('lrn_one', 'latin', 'all', DAY, settings);
+    const first = await service.answer(ask(queue.entries[0]!.cell.id, 'x'), settings);
+    const second = await service.answer(ask(queue.entries[1]!.cell.id, 'x'), settings);
+    expect(second.session.id).toBe(first.session.id);
+  });
+
+  it('reports a session from a previous day as stale', async () => {
+    const { service } = await build();
+    const queue = await service.queue('lrn_one', 'latin', 'all', DAY, settings);
+    await service.answer(ask(queue.entries[0]!.cell.id, 'x'), settings);
+    const later = d('2024-10-23');
+    const plan = await service.resumePlan('lrn_one', 'all', later);
+    expect(plan.action).toBe('close-and-open');
+    expect(plan.staleFor).toBe(2);
+  });
+
+  it('opens a fresh session on a new day and closes the stale one', async () => {
+    const { service, stores } = await build();
+    const queue = await service.queue('lrn_one', 'latin', 'all', DAY, settings);
+    const first = await service.answer(ask(queue.entries[0]!.cell.id, 'x'), settings);
+
+    const later = d('2024-10-23');
+    const nextQueue = await service.queue('lrn_one', 'latin', 'all', later, settings);
+    const second = await service.answer(
+      { ...ask(nextQueue.entries[0]!.cell.id, 'x'), on: later },
+      settings,
+    );
+
+    expect(second.session.id).not.toBe(first.session.id);
+    expect(await stores.sessions.listOpen('lrn_one')).toHaveLength(1);
+    expect((await stores.sessions.get(first.session.id))?.closed).toBe(true);
+  });
+
+  it('does not carry yesterday burial into today', async () => {
+    const { service } = await build();
+    const queue = await service.queue('lrn_one', 'latin', 'all', DAY, settings);
+    const target = queue.entries[0]!.cell;
+    await service.answer(ask(target.id, 'x'), settings);
+
+    const later = d('2024-10-23');
+    const nextQueue = await service.queue('lrn_one', 'latin', 'all', later, settings);
+    expect(nextQueue.excluded.get(target.id)).not.toBe('buried');
+  });
+});

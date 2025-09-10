@@ -8,6 +8,8 @@ import type { Queue } from '../../domain/drill/queue.js';
 import { assembleQueue } from '../../domain/drill/queue.js';
 import type { ReviewResult, ReviewSettings } from '../../domain/drill/review.js';
 import { reviewAnswer } from '../../domain/drill/review.js';
+import { pickResumable, planResume, staleSessions } from '../../domain/drill/resume.js';
+import type { ResumePlan } from '../../domain/drill/resume.js';
 import type { Session } from '../../domain/drill/session.js';
 import {
   closeSession,
@@ -59,6 +61,7 @@ export interface AnswerOutcome {
 }
 
 export interface DrillService {
+  resumePlan(learnerId: string, deckKey: string, on?: CivilDate): Promise<ResumePlan>;
   context(language: string): Promise<DrillContext>;
   deck(language: string, key: string): Promise<Deck>;
   membership(language: string, deckKey: string, on: CivilDate): Promise<Membership>;
@@ -99,16 +102,42 @@ export function createDrillService(stores: Stores, bus: EventBus, clock: Clock):
     };
   };
 
+  /**
+   * Finds the session to answer into. A stale one is closed rather than
+   * resumed, because its buried twins were buried for a day that has passed,
+   * and resuming into it would hide cells that are due now.
+   */
   const openFor = async (learnerId: string, deckKey: string, on: CivilDate): Promise<Session> => {
     const open = await stores.sessions.listOpen(learnerId);
-    const found = open.find((session) => session.deckKey === deckKey && session.on === on);
-    return found ?? openSession(learnerId, deckKey, on);
+    const candidate = pickResumable(open, deckKey, on);
+    const plan = planResume(candidate, on);
+
+    if (plan.action === 'resume' && candidate !== undefined) {
+      return candidate;
+    }
+
+    for (const stale of staleSessions(open, on)) {
+      await stores.sessions.put(closeSession(stale));
+    }
+    return openSession(learnerId, deckKey, on);
   };
 
   return {
     context: loadContext,
     deck: loadDeck,
     membership: loadMembership,
+
+    async resumePlan(learnerId, deckKey, on) {
+      const day = on ?? clock.today();
+      const open = await stores.sessions.listOpen(learnerId);
+      // Falls back to a stale session of the same deck so the plan can say it
+      // will be closed. Reporting nothing to resume when there is an open
+      // session sitting there is technically true and useless.
+      const candidate =
+        pickResumable(open, deckKey, day) ??
+        staleSessions(open, day).find((session) => session.deckKey === deckKey);
+      return planResume(candidate, day);
+    },
 
     async queue(learnerId, language, deckKey, on, settings) {
       const day = on ?? clock.today();
