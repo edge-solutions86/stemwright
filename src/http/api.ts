@@ -3,6 +3,7 @@ import type { AccountDirectory } from './auth.js';
 import { withProblems } from './problem.js';
 import type { Handler, Route } from './router.js';
 import { createRouter, json, route } from './router.js';
+import { bulkRoutes } from './routes/bulk-routes.js';
 import { drillRoutes } from './routes/drill-routes.js';
 import { lexiconRoutes } from './routes/lexicon-routes.js';
 import { reportRoutes } from './routes/report-routes.js';
@@ -45,6 +46,7 @@ export function apiRoutes(app: Application, options: ApiOptions): Route[] {
   return [
     ...healthRoutes(options),
     ...drillRoutes({ directory: options.directory, drill: app.drill, scopeOf }),
+    ...bulkRoutes({ directory: options.directory, drill: app.drill, scopeOf }),
     ...lexiconRoutes({ directory: options.directory, lexicon: app.lexicon }),
     ...reportRoutes({ directory: options.directory, reports: app.reports, scopeOf }),
   ];
