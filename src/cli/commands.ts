@@ -10,6 +10,7 @@ import { buildTable, tableToText } from '../domain/paradigm/table.js';
 import { coverageByBundle, maturityOf, weakestRows } from '../domain/report/coverage.js';
 import { parseCivilDate } from '../domain/time/civil.js';
 import { routeTable } from '../http/api.js';
+import { deckCommand, decksCommand } from './deck-command.js';
 import { importCommand } from './import-command.js';
 import { requireFlag, stringFlag } from './args.js';
 import type { Command } from './program.js';
@@ -203,5 +204,7 @@ export function allCommands(app: Application): Command[] {
     lexemesCommand(app),
     routesCommand(app),
     importCommand(app),
+    deckCommand(app),
+    decksCommand(app),
   ];
 }
