@@ -8,11 +8,11 @@ import { emptyLedger, ledgerCounts } from '../domain/mastery/ledger.js';
 import { profileFor } from '../domain/paradigm/book.js';
 import { buildTable, tableToText } from '../domain/paradigm/table.js';
 import { coverageByBundle, maturityOf, weakestRows } from '../domain/report/coverage.js';
-import { parseCivilDate } from '../domain/time/civil.js';
 import { routeTable } from '../http/api.js';
 import { deckCommand, decksCommand } from './deck-command.js';
 import { importCommand } from './import-command.js';
 import { requireFlag, stringFlag } from './args.js';
+import { dayFlag, dayFrom, deckFlag, languageFlag, learnerFlag } from './flags.js';
 import type { Command } from './program.js';
 import { bar, keyValues, percent, table } from './render.js';
 
@@ -31,20 +31,6 @@ import { bar, keyValues, percent, table } from './render.js';
  * scope to satisfy a check that means nothing here would make the real check
  * look optional.
  */
-const dayFlag = { kind: 'string' as const, describe: 'the civil day to resolve against' };
-const languageFlag = { kind: 'string' as const, describe: 'the language key', required: true };
-const deckFlag = { kind: 'string' as const, alias: 'd', describe: 'the deck key', required: true };
-const learnerFlag = {
-  kind: 'string' as const,
-  alias: 'l',
-  describe: 'the learner id',
-  required: true,
-};
-
-function dayOr(value: string | undefined, fallback: string): string {
-  return value ?? fallback;
-}
-
 export function queueCommand(app: Application): Command {
   return {
     name: 'queue',
@@ -52,7 +38,7 @@ export function queueCommand(app: Application): Command {
     usage: 'stemwright queue --language latin --deck all --learner lrn_one',
     flags: { language: languageFlag, deck: deckFlag, learner: learnerFlag, on: dayFlag },
     async run(args) {
-      const on = parseCivilDate(dayOr(stringFlag(args, 'on'), app.clock.today()), 'on');
+      const on = dayFrom(app.clock, args);
       const queue = await app.drill.queue(
         requireFlag(args, 'learner'),
         requireFlag(args, 'language'),
@@ -81,7 +67,7 @@ export function paradigmCommand(app: Application): Command {
     },
     async run(args) {
       const language = requireFlag(args, 'language');
-      const on = parseCivilDate(dayOr(stringFlag(args, 'on'), app.clock.today()), 'on');
+      const on = dayFrom(app.clock, args);
       const bundle = await requireLanguage(app.stores, language);
       const context = await app.drill.context(language);
       const entry = requireLexeme(context.lexicon, requireFlag(args, 'lexeme'));
@@ -108,7 +94,7 @@ export function coverageCommand(app: Application): Command {
     flags: { language: languageFlag, deck: deckFlag, learner: learnerFlag, on: dayFlag },
     async run(args) {
       const learnerId = requireFlag(args, 'learner');
-      const on = parseCivilDate(dayOr(stringFlag(args, 'on'), app.clock.today()), 'on');
+      const on = dayFrom(app.clock, args);
       const membership = await app.drill.membership(
         requireFlag(args, 'language'),
         requireFlag(args, 'deck'),

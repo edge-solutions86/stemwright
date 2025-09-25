@@ -1,9 +1,9 @@
 import { readFile } from 'node:fs/promises';
 import type { Application } from '../app/application.js';
 import { requireLanguage } from '../app/loaders.js';
-import type { Actor } from '../domain/course/authz.js';
 import { collisionsWith, describeImport, importCsv } from '../io/lexicon-import.js';
-import { booleanFlag, requireFlag, stringFlag } from './args.js';
+import { booleanFlag, requireFlag } from './args.js';
+import { actorFlag, actorFrom, languageFlag } from './flags.js';
 import type { Command } from './program.js';
 import { section } from './render.js';
 
@@ -21,10 +21,10 @@ export function importCommand(app: Application): Command {
     describe: 'read a csv word list and report what it would add',
     usage: 'stemwright import --language latin --file words.csv --apply',
     flags: {
-      language: { kind: 'string', describe: 'the language key', required: true },
+      language: languageFlag,
       file: { kind: 'string', alias: 'f', describe: 'the csv file to read', required: true },
       apply: { kind: 'boolean', describe: 'actually write the accepted rows' },
-      actor: { kind: 'string', describe: 'the instructor id doing the import' },
+      actor: actorFlag,
     },
     async run(args) {
       const language = requireFlag(args, 'language');
@@ -45,10 +45,7 @@ export function importCommand(app: Application): Command {
         return lines.join('\n');
       }
 
-      const actor: Actor = {
-        id: stringFlag(args, 'actor') ?? 'cli',
-        role: 'instructor',
-      };
+      const actor = actorFrom(args);
       let written = 0;
       for (const entry of report.accepted) {
         await app.lexicon

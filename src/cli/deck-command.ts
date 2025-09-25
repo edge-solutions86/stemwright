@@ -14,26 +14,10 @@ import {
   describeDeck,
   thinnestBundles,
 } from '../domain/report/deck-stats.js';
-import { parseCivilDate } from '../domain/time/civil.js';
-import { numberFlag, requireFlag, stringFlag } from './args.js';
+import { requireFlag, stringFlag } from './args.js';
+import { countFrom, dayFlag, dayFrom, deckFlag, languageFlag } from './flags.js';
 import type { Command } from './program.js';
 import { keyValues, section, table } from './render.js';
-
-/**
- * Looking at a deck before a class is given it.
- *
- * The number worth reading is the imbalance. A deck definition that reads
- * perfectly well can still come out ninety percent nominative once the class
- * tree it names has been expanded, and nobody notices until a term of learners
- * has been drilled on one row of the table. The stored definition tells you
- * nothing about that, because the cells only exist after a day has been picked
- * and the profiles in force on it have been resolved.
- *
- * `--cells` narrows the stored deck without saving, so an editor can ask what a
- * selector would do before committing to it.
- */
-const dayFlag = { kind: 'string' as const, describe: 'the civil day to resolve against' };
-const languageFlag = { kind: 'string' as const, describe: 'the language key', required: true };
 
 const SPREAD_DEFAULT = 3;
 
@@ -78,6 +62,19 @@ function skipRows(membership: ReturnType<typeof resolveMembership>): string[][] 
     .map(([reason, count]) => [reason, String(count)]);
 }
 
+/**
+ * Looking at a deck before a class is given it.
+ *
+ * The number worth reading is the imbalance. A deck definition that reads
+ * perfectly well can still come out ninety percent nominative once the class
+ * tree it names has been expanded, and nobody notices until a term of learners
+ * has been drilled on one row of the table. The stored definition tells you
+ * nothing about that, because the cells only exist after a day has been picked
+ * and the profiles in force on it have been resolved.
+ *
+ * `--cells` narrows the stored deck without saving, so an editor can ask what a
+ * selector would do before committing to it.
+ */
 export function deckCommand(app: Application): Command {
   return {
     name: 'deck',
@@ -85,7 +82,7 @@ export function deckCommand(app: Application): Command {
     usage: 'stemwright deck --language latin --deck all',
     flags: {
       language: languageFlag,
-      deck: { kind: 'string', alias: 'd', describe: 'the deck key', required: true },
+      deck: deckFlag,
       on: dayFlag,
       cells: { kind: 'string', describe: 'narrow to a cell selector without saving it' },
       spread: { kind: 'number', describe: 'how many bundles to list at each end' },
@@ -93,7 +90,7 @@ export function deckCommand(app: Application): Command {
     async run(args) {
       const language = requireFlag(args, 'language');
       const bundle = await requireLanguage(app.stores, language);
-      const on = parseCivilDate(stringFlag(args, 'on') ?? app.clock.today(), 'on');
+      const on = dayFrom(app.clock, args);
 
       const stored = await app.decks.get(language, requireFlag(args, 'deck'));
       const narrow = stringFlag(args, 'cells');
@@ -103,7 +100,7 @@ export function deckCommand(app: Application): Command {
       const context = await app.drill.context(language);
       const membership = resolveMembership(context, entry, on);
       const stats = deckStats(entry, membership, allLexemes(context.lexicon));
-      const limit = Math.max(1, numberFlag(args, 'spread') ?? SPREAD_DEFAULT);
+      const limit = countFrom(args, 'spread', SPREAD_DEFAULT);
 
       const summary = keyValues([
         ['scope', describeScope(entry.scope)],
@@ -163,7 +160,7 @@ export function decksCommand(app: Application): Command {
     async run(args) {
       const language = requireFlag(args, 'language');
       await requireLanguage(app.stores, language);
-      const on = parseCivilDate(stringFlag(args, 'on') ?? app.clock.today(), 'on');
+      const on = dayFrom(app.clock, args);
 
       const context = await app.drill.context(language);
       const lexemes = allLexemes(context.lexicon);
