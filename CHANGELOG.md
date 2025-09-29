@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.0.0 - 2025-09-29
+
+### Added
+
+- `stemwright doctor`, an editorial sweep over one language on one day. It
+  reports the three different reasons a learner ends up with an empty queue,
+  which are indistinguishable from the learner's side: a class with no paradigm
+  bound, a profile with nothing in force yet, and a deck that selects nothing.
+  It exits non zero on an error, and `--strict` widens that to a warning so a
+  repository of teaching material can run it in its own ci.
+- `stemwright deck` and `stemwright decks`, which read a deck the way an editor
+  needs to rather than the way it was written: what it resolves to on a day, how
+  far its busiest bundle sits above the average, and which lexemes fell out and
+  why. `--cells` narrows a stored deck without saving the change.
+
+### Changed
+
+- The flags more than one command declares now live in `src/cli/flags.ts`. The
+  `--on` handling had already drifted into two spellings, and a second idea of
+  what day it is is not something to leave lying around in a tool organised
+  around days.
+
 ## Unreleased
 
 ### Changed

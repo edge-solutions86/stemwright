@@ -12,7 +12,7 @@ import { memoryStores } from '../infra/memory.js';
  * take the table without taking the error message with it. The exit code is
  * whatever the dispatcher decided, and nothing here throws.
  */
-export const VERSION = '0.6.0';
+export const VERSION = '1.0.0';
 
 export function buildProgram(): Program {
   return {

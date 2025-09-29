@@ -10,6 +10,7 @@ import { buildTable, tableToText } from '../domain/paradigm/table.js';
 import { coverageByBundle, maturityOf, weakestRows } from '../domain/report/coverage.js';
 import { routeTable } from '../http/api.js';
 import { deckCommand, decksCommand } from './deck-command.js';
+import { doctorCommand } from './doctor-command.js';
 import { importCommand } from './import-command.js';
 import { requireFlag, stringFlag } from './args.js';
 import { dayFlag, dayFrom, deckFlag, languageFlag, learnerFlag } from './flags.js';
@@ -192,5 +193,6 @@ export function allCommands(app: Application): Command[] {
     importCommand(app),
     deckCommand(app),
     decksCommand(app),
+    doctorCommand(app),
   ];
 }
