@@ -39,6 +39,9 @@
     <coverage.minimum>0.80</coverage.minimum>
     <!-- JaCoCo prepends its agent here; empty so a build with -Djacoco.skip still forks. -->
     <argLine />
+    <!-- The tagged groups surefire runs and leaves out. The perf profile swaps them. -->
+    <test.groups />
+    <test.excludedGroups>performance</test.excludedGroups>
   </properties>
 
   <dependencyManagement>
@@ -162,6 +165,9 @@
           <reuseForks>true</reuseForks>
           <!-- Fixed so that nothing in the suite can lean on the machine's locale or zone. -->
           <argLine>@{argLine} -Duser.language=en -Duser.country=US -Duser.timezone=UTC -Dfile.encoding=UTF-8</argLine>
+          <!-- The timing suite has ceilings a loaded machine can miss, so it runs on its own under -Pperf. -->
+          <groups>${test.groups}</groups>
+          <excludedGroups>${test.excludedGroups}</excludedGroups>
         </configuration>
       </plugin>
 
@@ -276,4 +282,17 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <!-- ./mvnw -B -Pperf test runs the timing suite and nothing else. -->
+      <id>perf</id>
+      <properties>
+        <test.groups>performance</test.groups>
+        <test.excludedGroups />
+        <!-- Instrumented code runs slower, and the ceilings would then measure the agent. -->
+        <jacoco.skip>true</jacoco.skip>
+      </properties>
+    </profile>
+  </profiles>
 </project>
