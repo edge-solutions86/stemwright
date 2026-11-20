@@ -10,15 +10,15 @@ import io.github.rkaushikdev.stemwright.support.Problems;
 import org.junit.jupiter.api.Test;
 
 /**
- * How a snapshot document is read when it is not quite what this port writes. The original read the
- * learners through JavaScript's {@code String} and defaulted a missing or {@code null} payload field
- * to an empty list, and a snapshot it loaded has to load here too. A sequence is a whole number here,
- * as a journal entry's is.
+ * How a snapshot document is read when it is not quite what {@link Snapshot#encode} writes. A
+ * learner that is not a string is read as text, and a missing or {@code null} payload field as an
+ * empty list, so every snapshot already on disk still loads. A sequence is a whole number, as a
+ * journal entry's is.
  */
 class SnapshotDecodingTest {
 
     @Test
-    void readsALearnerThatIsNotAStringAsTheOriginalDid() {
+    void readsALearnerThatIsNotAStringAsText() {
         Snapshot snapshot = Snapshot.decode(
                 "{\"seq\":1,\"at\":\"x\",\"learners\":[\"lrn_one\",2,1.5,true,null,[1,null,[2,3]],{}]}");
         assertThat(snapshot.learners())

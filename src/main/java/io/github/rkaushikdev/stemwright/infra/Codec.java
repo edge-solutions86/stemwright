@@ -88,10 +88,10 @@ public final class Codec {
     /**
      * A finite number with no fractional part, small enough that a double still counts it exactly.
      *
-     * <p>The original read such fields with {@link #readNumber} and carried a fraction along until
-     * something compared it. A Java field that holds a count or a sequence cannot hold the fraction,
-     * so this refuses it where it is read, under {@code path.key}: {@code must be a whole number:
-     * 2.5}, and for a number past {@code 2^53 - 1} either way, the range it must fall in.
+     * <p>A field that holds a count or a sequence cannot hold a fraction, so rather than carrying
+     * one along until something compares it, this refuses it where it is read, under {@code
+     * path.key}: {@code must be a whole number: 2.5}, and for a number past {@code 2^53 - 1} either
+     * way, the range it must fall in.
      */
     public static long readWholeNumber(JsonObject row, String path, String key) {
         double value = readNumber(row, path, key);

@@ -9,10 +9,9 @@ import io.github.rkaushikdev.stemwright.infra.json.JsonObject;
 import org.junit.jupiter.api.Test;
 
 /**
- * The policy block's counts are ints in Java and doubles in json. These pin down that a count an
- * int cannot hold is refused exactly as the original policy refused it, in its words and at its
- * place among the other problems, and that the block keeps telling a missing field from a {@code
- * null} one.
+ * The policy block's counts are ints in the patch and doubles in json. These pin down that a count
+ * an int cannot hold is refused in the policy's own words and at its place among the other
+ * problems, and that the block keeps telling a missing field from a {@code null} one.
  */
 class ConfigPolicyCountsTest {
 
@@ -59,7 +58,7 @@ class ConfigPolicyCountsTest {
     }
 
     @Test
-    void printsACountThatIsNotFiniteAsTheOriginalDid() {
+    void printsACountThatIsNotFiniteAsNaNOrInfinity() {
         assertThat(problemMessages(() -> withPolicy(Json.object().put("perLexemeCap", Double.NaN))))
                 .containsExactly("policy perLexemeCap must be a whole number: NaN");
         assertThat(problemMessages(() -> withPolicy(Json.object().put("rowSpacing", Double.NEGATIVE_INFINITY))))

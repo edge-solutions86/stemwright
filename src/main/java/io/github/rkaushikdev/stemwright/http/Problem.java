@@ -78,8 +78,8 @@ public record Problem(String code, String message, List<ErrorDetail> details) {
     }
 
     /**
-     * Wraps a handler so no exception it throws gets past. The reporter is called with the original
-     * exception when it is not a domain failure, so an operator still sees the stack that the client
+     * Wraps a handler so no exception it throws gets past. The reporter is called with the exception
+     * itself when it is not a domain failure, so an operator still sees the stack that the client
      * does not. An {@link Error}, such as running out of memory, is not something a response can
      * answer, and still propagates.
      */

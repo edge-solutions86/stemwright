@@ -48,7 +48,7 @@ class ReplayTest {
                 .revisionId("rev_aaaaaa");
     }
 
-    /** The base input as plain json, the way the original test wrote it straight into a payload. */
+    /** The base input as plain json, written straight into a payload. */
     private static JsonObject baseRow() {
         return Json.object()
                 .put("learnerId", "lrn_one")

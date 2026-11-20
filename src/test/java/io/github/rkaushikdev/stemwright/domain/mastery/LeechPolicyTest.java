@@ -42,8 +42,8 @@ class LeechPolicyTest {
         }
 
         /**
-         * The original also refuses a threshold of two and a half by its message. A threshold is an
-         * {@code int} here, so the message is checked on a negative threshold instead.
+         * A threshold is an {@code int}, so a threshold of two and a half cannot be written; the
+         * message is checked on a negative threshold instead.
          */
         @Test
         void refusesAThresholdBelowOne() {

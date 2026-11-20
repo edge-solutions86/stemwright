@@ -76,7 +76,7 @@ public record JsonObject(Map<String, Json> fields) implements Json {
 
     /**
      * Builds an object a field at a time. Putting a key a second time replaces its value and keeps
-     * its first position, as assigning to a JavaScript object does.
+     * its first position, so the printed key order is the order keys were first put in.
      */
     public static final class Builder {
 

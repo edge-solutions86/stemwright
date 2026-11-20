@@ -22,9 +22,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * What the adapter does on the wire that the original suite leaves to node: how header names reach
- * a route, which methods are refused before routing, which headers and bodies go out, what the log
- * line holds, and how a server binds and stops.
+ * What the adapter does on the wire, below the routes: how header names reach a route, which
+ * methods are refused before routing, which headers and bodies go out, what the log line holds,
+ * and how a server binds and stops.
  */
 class ServerWireTest {
 

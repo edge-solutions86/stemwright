@@ -9,8 +9,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * The wire shape of a problem, which the original got from {@code JSON.stringify} of the problem
- * object and which a client reads field by field.
+ * The wire shape of a problem, compact json with its fields in a fixed order, which a client reads
+ * field by field.
  */
 class ProblemBodyTest {
 

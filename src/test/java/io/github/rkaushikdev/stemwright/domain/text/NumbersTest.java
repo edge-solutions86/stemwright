@@ -111,7 +111,7 @@ class NumbersTest {
             "+Infinity, Infinity",
             "-Infinity, -Infinity",
         })
-        void readsWhatJavaScriptReadsAsANumber(String text, double expected) {
+        void readsEveryLenientNumberForm(String text, double expected) {
             assertThat(Numbers.parse(text)).isEqualTo(expected);
         }
 

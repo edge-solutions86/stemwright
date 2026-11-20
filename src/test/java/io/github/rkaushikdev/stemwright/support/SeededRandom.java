@@ -10,8 +10,8 @@ import java.util.function.BiConsumer;
  * message.
  *
  * <p>This is deliberately not a fuzzing library. The point is to cover a lot of ordinary inputs
- * cheaply, not to find adversarial ones. The generator is a 32 bit xorshift, and the draws are the
- * same ones the original suite made from the same seeds.
+ * cheaply, not to find adversarial ones. The generator is a 32 bit xorshift, so a seed gives the
+ * same draws on every machine and every run.
  */
 public final class SeededRandom {
 

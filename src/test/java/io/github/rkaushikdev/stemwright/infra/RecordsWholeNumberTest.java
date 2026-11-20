@@ -16,7 +16,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * A stored sequence or count is a json number, and the records hold them as {@code int}. A number an
- * {@code int} cannot carry is refused where the original refused it, with the original's words.
+ * {@code int} cannot carry is refused where the record's own checks refuse a bad value, in their
+ * words.
  */
 class RecordsWholeNumberTest {
 

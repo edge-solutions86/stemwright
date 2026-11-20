@@ -31,18 +31,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * A data directory the TypeScript original wrote has to load here unchanged, and what this port
- * writes has to be what the original wrote.
+ * A data directory already on disk has to load unchanged, and what is written now has to be byte
+ * for byte what is already stored, because the journal format is fixed.
  *
  * <p>The fixture under {@code src/test/resources/journal} is such a directory, written by hand from
- * the original's code rather than by this port: {@code journal.ndjson} holds nine entries as {@code
- * fileJournal} appended them, each line the compact {@code JSON.stringify} of seq, at, kind and
- * payload and each ended with a line feed, the payloads in the key order of {@code encodeAttempt}
- * and {@code encodeLedger}, and the stamps as {@code Date#toISOString} prints them; {@code
- * snapshots/000000000007.json} is what {@code compact} wrote at sequence seven, {@code
- * JSON.stringify} indented by two with no line end after it. The answers they record are the ones
- * below, two learners over three days on a flat ladder, one Greek answer untimed and two Latin ones
- * appended together.
+ * the format rather than by this code: {@code journal.ndjson} holds nine entries as {@link
+ * FileJournal} appends them, each line the compact json of seq, at, kind and payload and each
+ * ended with a line feed, the payloads in the key order of {@code encodeAttempt} and {@code
+ * encodeLedger}, and the stamps as ISO 8601 instants in utc with three millisecond digits; {@code
+ * snapshots/000000000007.json} is what {@code compact} writes at sequence seven, the json indented
+ * by two with no line end after it. The answers they record are the ones below, two learners over
+ * three days on a flat ladder, one Greek answer untimed and two Latin ones appended together.
  */
 class StoredJournalCompatibilityTest {
 
@@ -140,7 +139,7 @@ class StoredJournalCompatibilityTest {
     }
 
     @Test
-    void replaysAJournalTheOriginalWroteIntoTheStateItRecorded(@TempDir Path root) throws IOException {
+    void replaysAStoredJournalIntoTheStateItRecorded(@TempDir Path root) throws IOException {
         Journal journal = FileJournal.open(dataDirectory(root, false));
         Stores stores = MemoryStores.create();
 
@@ -190,7 +189,7 @@ class StoredJournalCompatibilityTest {
     }
 
     @Test
-    void writesTheBytesTheOriginalWroteForTheSameAnswers(@TempDir Path root) throws IOException {
+    void writesTheStoredBytesForTheSameAnswers(@TempDir Path root) throws IOException {
         DataLayout layout = DataLayout.of(root);
         SteppableClock clock = Clock.steppable(Instant.parse("2025-03-03T09:00:00Z"), MONDAY);
         Stores stores = JournalledStores.of(MemoryStores.create(), FileJournal.open(layout), clock)
@@ -221,7 +220,7 @@ class StoredJournalCompatibilityTest {
     }
 
     @Test
-    void bootstrapsFromASnapshotTheOriginalWroteToTheStateTheWholeJournalGives(
+    void bootstrapsFromAStoredSnapshotToTheStateTheWholeJournalGives(
             @TempDir Path withSnapshot, @TempDir Path journalOnly) throws IOException {
         DataLayout fast = dataDirectory(withSnapshot, true);
         Stores fromSnapshot = MemoryStores.create();
@@ -244,7 +243,7 @@ class StoredJournalCompatibilityTest {
     }
 
     @Test
-    void writesTheSnapshotTheOriginalWroteByteForByte(@TempDir Path root) throws IOException {
+    void writesTheStoredSnapshotByteForByte(@TempDir Path root) throws IOException {
         List<JournalEntry> entries = Journal.decode(new String(journalBytes(), StandardCharsets.UTF_8));
         Stores stores = MemoryStores.create();
         Replay.apply(entries.subList(0, 7), stores);

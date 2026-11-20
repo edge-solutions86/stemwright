@@ -90,8 +90,10 @@ public record Snapshot(long seq, String at, List<String> learners, JsonObject pa
 
     /**
      * Reads a snapshot document back. A missing or {@code null} {@code ledgers} or {@code attempts}
-     * reads as an empty list, and a learner that is not a string is read as the text JavaScript's
-     * {@code String} gives it, as the original did.
+     * reads as an empty list, and a learner that is not a string is still read as text, which is
+     * what snapshots already on disk require: a number as {@link Numbers#text} prints it, a boolean
+     * or {@code null} as its keyword, an array as its items joined by commas, and an object as
+     * {@code [object Object]}.
      *
      * @throws IntegrityException when the text is not json or holds no {@code learners} array
      * @throws ValidationException when it is not an object, or its sequence is not a whole number or
@@ -200,7 +202,11 @@ public record Snapshot(long seq, String at, List<String> learners, JsonObject pa
         return row.get(key).filter(value -> !(value instanceof JsonNull)).orElse(JsonArray.EMPTY);
     }
 
-    /** The text JavaScript's {@code String(value)} gives a parsed json value. */
+    /**
+     * A parsed json value as text: a string as it is, a number as {@link Numbers#text} prints it, a
+     * boolean or {@code null} as its keyword, an array as its items' texts joined by commas with a
+     * {@code null} item left empty, and any object as {@code [object Object]}.
+     */
     private static String asText(Json value) {
         return switch (value) {
             case JsonString string -> string.value();

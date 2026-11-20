@@ -3,12 +3,12 @@ package io.github.rkaushikdev.stemwright.infra.json;
 import java.util.Optional;
 
 /**
- * A json number, which is a double, as every number in the original was.
+ * A json number, which is an IEEE 754 double, as every number the desk stores is.
  *
  * <p>It can hold a value json cannot write, an infinity or a NaN, because a value is often built
- * before anything checks it; {@link Json#stringify} prints such a value as {@code null}, as {@code
- * JSON.stringify} does. Two numbers are equal by {@link Double#compare}, so {@code 0} and {@code -0}
- * differ, as they do under a vitest {@code toEqual}.
+ * before anything checks it; {@link Json#stringify} prints such a value as {@code null}. Two
+ * numbers are equal by {@link Double#compare}, so {@code 0} and {@code -0} differ and a NaN equals
+ * itself.
  *
  * @param value the number
  */

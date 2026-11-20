@@ -26,8 +26,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Reading one learner's progress announces an assignment met when it meets the target, and reading
- * the cohort announces nothing. The original suite never reaches a met target, so this sets a
- * one-day practice target and drills once.
+ * the cohort announces nothing. To reach a met target at all, this sets a one-day practice target
+ * and drills once.
  */
 class CourseServiceEventsTest {
 

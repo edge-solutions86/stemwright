@@ -46,9 +46,10 @@ class LadderTest {
         }
 
         /**
-         * The original also refuses a rung of a day and a half. A rung is an {@code int} here, so the
-         * type refuses that one; the second case is a rung below a day that also follows a longer rung,
-         * which must be reported once, as below a day, and not again as shorter than the rung before.
+         * A rung of a day and a half cannot be written, because a rung is an {@code int} and the
+         * type refuses it; the second case is a rung below a day that also follows a longer rung,
+         * which must be reported once, as below a day, and not again as shorter than the rung
+         * before.
          */
         @Test
         void refusesARungBelowADayOrAFractionalOne() {
@@ -104,9 +105,9 @@ class LadderTest {
         }
 
         /**
-         * The original truncates a rung of 2.9 to 2 and rescues a rung of NaN to 0. Neither can be an
-         * {@code int}; the rung an {@code int} can break is one at the edge of its range, where
-         * climbing or lapsing would wrap round to the opposite end of the ladder.
+         * A fractional rung or a NaN cannot be an {@code int}; the rung an {@code int} can break is
+         * one at the edge of its range, where climbing or lapsing would wrap round to the opposite
+         * end of the ladder.
          */
         @Test
         void rescuesABrokenRung() {

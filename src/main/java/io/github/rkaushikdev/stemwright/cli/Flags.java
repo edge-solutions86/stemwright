@@ -13,10 +13,10 @@ import java.util.Optional;
  * The flags more than one command declares, and the readers that turn them into the values the
  * layer below wants.
  *
- * <p>Every command used to write its own {@code --on} handling, and they had drifted: one of them
- * fell back to the clock through a helper, another through a nullish coalesce, and the two would
- * not have stayed the same for long. A day is the argument this whole tool is organised around, so
- * there is exactly one place that decides what happens when it is left off.
+ * <p>Every command used to write its own {@code --on} handling, and they had drifted: two of them
+ * fell back to the clock in two different ways, and would not have stayed the same for long. A day
+ * is the argument this whole tool is organised around, so there is exactly one place that decides
+ * what happens when it is left off.
  */
 public final class Flags {
 

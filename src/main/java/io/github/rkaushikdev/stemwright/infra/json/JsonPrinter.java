@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The writer behind {@link Json#stringify}, which prints what {@code JSON.stringify} prints.
+ * The writer behind {@link Json#stringify}, which prints every value in one canonical form: keys in
+ * the order they were added, numbers as {@link Numbers#format(double)} prints them and {@code null}
+ * when not finite, no space outside a string when compact.
  *
  * <p>A string escapes the quote, the backslash and the five short control escapes, writes every
  * other unit below a space as a six character escape in lower case hex, writes a lone surrogate the
@@ -14,7 +16,7 @@ import java.util.Map;
  */
 final class JsonPrinter {
 
-    /** {@code JSON.stringify} never indents by more than this, whatever it is asked for. */
+    /** The deepest indent per level, whatever is asked for; a larger request is capped here. */
     private static final int MAX_INDENT = 10;
 
     private static final char[] HEX = "0123456789abcdef".toCharArray();

@@ -40,7 +40,7 @@ class AttemptTest {
         return Attempt.of(BASE);
     }
 
-    /** The base attempt with some of its parts changed, as a spread over the base would. */
+    /** The base attempt with the parts the patch sets changed, and every other part kept. */
     private static Attempt make(UnaryOperator<AttemptInput.Builder> patch) {
         return Attempt.of(patch.apply(BASE.toBuilder()).build());
     }

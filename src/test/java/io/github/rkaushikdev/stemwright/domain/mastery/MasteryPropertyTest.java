@@ -110,7 +110,7 @@ class MasteryPropertyTest {
             });
         }
 
-        /** The loop bound is drawn again on every pass, exactly as the original wrote it. */
+        /** The loop bound is drawn again on every pass, on purpose: a seed's draws depend on it. */
         @Test
         void neverSchedulesAReviewInThePastRelativeToTheAnswer() {
             forEachDraw(80, 9973, (random, draw) -> {

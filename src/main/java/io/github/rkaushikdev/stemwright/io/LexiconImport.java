@@ -75,11 +75,12 @@ public final class LexiconImport {
     }
 
     /**
-     * One row as a lexeme. The homograph cell is read as JavaScript's {@code Number} reads it, so
-     * {@code 2.0} is two and {@code two} is NaN. A value an {@code int} cannot carry, a fraction, a
-     * NaN or one past {@link Integer#MAX_VALUE}, goes in as zero, which {@link Lexeme#of} refuses at
-     * the same point among its checks as any other bad homograph; the refusal is then restated for the
-     * value the cell held, so the report reads {@code must be a positive whole number: 2.5}.
+     * One row as a lexeme. The homograph cell is read leniently as {@link Numbers#parse} reads it,
+     * so {@code 2.0} is two and {@code two} is NaN. A value an {@code int} cannot carry, a
+     * fraction, a NaN or one past {@link Integer#MAX_VALUE}, goes in as zero, which {@link
+     * Lexeme#of} refuses at the same point among its checks as any other bad homograph; the refusal
+     * is then restated for the value the cell held, so the report reads {@code must be a positive
+     * whole number: 2.5}.
      */
     private static Lexeme lexemeFrom(LexemeContext context, Map<String, String> row) {
         LexemeInput.Builder input = LexemeInput.builder(

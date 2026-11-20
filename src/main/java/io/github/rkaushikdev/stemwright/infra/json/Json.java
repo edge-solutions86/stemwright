@@ -14,13 +14,13 @@ import java.util.Optional;
  * compares by value: two objects are equal when they hold the same keys with equal values in any
  * order, the way a test compares two parsed documents.
  *
- * <p>{@link #parse} and {@link #stringify} reproduce what {@code JSON.parse} and {@code
- * JSON.stringify} do in the TypeScript this desk was first written in, byte for byte, because the
- * journal on disk and every response body on the wire were written by them. Numbers are doubles and
- * print through {@link io.github.rkaushikdev.stemwright.domain.text.Numbers#format(double)}. The
- * one difference is key order: an object keeps the order its keys were added in, where a JavaScript
- * object would move keys that look like array indices to the front. Nothing this desk stores is
- * keyed by a bare number.
+ * <p>{@link #parse} reads RFC 8259 json, and {@link #stringify} writes it in one canonical form,
+ * byte for byte the same every time, because the journals already on disk and the clients of every
+ * response body depend on the exact text. Numbers are doubles and print through {@link
+ * io.github.rkaushikdev.stemwright.domain.text.Numbers#format(double)}, the shortest text that
+ * reads back as the same double. An object keeps the order its keys were added in, keys that look
+ * like array indices included. A string escapes only the quote, the backslash, the control
+ * characters and a lone surrogate, and writes all other text as it is.
  */
 public sealed interface Json permits JsonString, JsonNumber, JsonBoolean, JsonNull, JsonArray, JsonObject {
 
@@ -62,9 +62,9 @@ public sealed interface Json permits JsonString, JsonNumber, JsonBoolean, JsonNu
     }
 
     /**
-     * Reads json text as {@code JSON.parse} does: the whole text must be one value, with only spaces,
-     * tabs and line ends around it; numbers become doubles, and a key written twice keeps its first
-     * position and its last value.
+     * Reads json text strictly: the whole text must be one value, with only spaces, tabs and line
+     * ends around it; numbers become doubles, and a key written twice keeps its first position and
+     * its last value.
      *
      * @throws JsonSyntaxException when the text is not json. It is not a domain failure, because the
      *     caller knows what the text was and is the one to say what it means that it was broken.
@@ -73,15 +73,18 @@ public sealed interface Json permits JsonString, JsonNumber, JsonBoolean, JsonNu
         return JsonParser.parse(text);
     }
 
-    /** The compact text {@code JSON.stringify(value)} prints, with no space anywhere. */
+    /**
+     * The compact canonical text, with no space anywhere outside a string: keys in insertion order,
+     * numbers in their shortest form, a value that is not finite as {@code null}.
+     */
     static String stringify(Json value) {
         return JsonPrinter.print(value, 0);
     }
 
     /**
-     * The text {@code JSON.stringify(value, null, indent)} prints: one entry per line, nested by the
-     * given number of spaces (at most ten), {@code "key": value} with one space, and an empty array or
-     * object kept on one line as {@code []} or {@code {}}. An indent below one prints compactly.
+     * The canonical text laid out for reading: one entry per line, nested by the given number of
+     * spaces (at most ten), {@code "key": value} with one space, and an empty array or object kept
+     * on one line as {@code []} or {@code {}}. An indent below one prints compactly.
      */
     static String stringify(Json value, int indent) {
         return JsonPrinter.print(value, indent);

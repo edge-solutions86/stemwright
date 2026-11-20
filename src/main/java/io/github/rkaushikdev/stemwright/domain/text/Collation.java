@@ -9,10 +9,10 @@ import java.util.List;
  * The order a person expects a list of words in: the root collation order, compared at three
  * levels.
  *
- * <p>This is the order the desk was written against, the Unicode root collation that a browser or
- * an ICU build gives for an English locale. Java's own {@link java.text.Collator} disagrees with
- * it on punctuation (it ignores a hyphen and a space) and on Greek case, so it cannot stand in.
- * The comparison runs in three passes, each consulted only when the one before is a tie:
+ * <p>This is the Unicode root collation, the order an ICU collator gives for an English locale.
+ * Java's own {@link java.text.Collator} disagrees with it on punctuation (it ignores a hyphen and a
+ * space) and on Greek case, so it cannot stand in. The comparison runs in three passes, each
+ * consulted only when the one before is a tie:
  *
  * <ol>
  *   <li>the letters, digits and punctuation, ignoring accents and case: spacing sorts before

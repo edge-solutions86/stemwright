@@ -8,9 +8,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * The homograph cell is read as JavaScript's {@code Number} reads it, and a lexeme's homograph is an
- * {@code int}. A cell an {@code int} cannot carry has to be reported exactly as the original reported
- * it, among the row's other problems and in their order.
+ * The homograph cell is read leniently as a number, and a lexeme's homograph is an {@code int}. A
+ * cell an {@code int} cannot carry is reported in the lexeme's own words for a bad homograph, among
+ * the row's other problems and in their order.
  */
 class LexiconImportHomographTest {
 
@@ -23,7 +23,7 @@ class LexiconImportHomographTest {
     }
 
     @Test
-    void refusesAFractionWithTheValueAsJavaScriptPrintsIt() {
+    void refusesAFractionWithTheValueInItsShortestForm() {
         assertThat(problemsOf("malus,second-declension,mal,apple tree,core,2.50"))
                 .containsExactly(new ErrorDetail("homograph", "must be a positive whole number: 2.5"));
     }

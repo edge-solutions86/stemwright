@@ -18,7 +18,11 @@ public final class Numbers {
 
     private static final double PLAIN_LIMIT = 1e21;
 
-    /** A decimal as JavaScript's {@code Number(text)} reads one, once the spacing is gone. */
+    /**
+     * A decimal {@link #parse} accepts once the spacing is gone: an optional sign, then either
+     * {@code Infinity} or digits with an optional fraction (or a bare fraction) and an optional
+     * exponent.
+     */
     private static final Pattern DECIMAL =
             Pattern.compile("[+-]?(?:Infinity|(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?)");
 
@@ -60,8 +64,8 @@ public final class Numbers {
 
     /**
      * A number as a message prints it, which is {@link #format(double)} for a finite value and
-     * {@code NaN}, {@code Infinity} or {@code -Infinity} otherwise, as JavaScript's {@code String(n)}
-     * spells them. A refusal quotes the value it refused, whatever it was.
+     * {@code NaN}, {@code Infinity} or {@code -Infinity} otherwise. A refusal quotes the value it
+     * refused, whatever it was.
      */
     public static String text(double value) {
         if (Double.isNaN(value)) {
@@ -106,8 +110,8 @@ public final class Numbers {
     }
 
     /**
-     * Reads text as a number the way the cli and the query string always have, which is the way
-     * JavaScript's {@code Number(text)} does: spacing around the number is ignored and blank text is
+     * Reads text as a number leniently, the way the cli and the query string always have: spacing
+     * around the number, as {@link Text#isSpace(int)} defines it, is ignored and blank text is
      * zero; a decimal may have a sign, a missing integer or fraction part ({@code .5}, {@code 5.})
      * and an exponent; {@code 0x}, {@code 0o} and {@code 0b} introduce an unsigned hex, octal or
      * binary integer; {@code Infinity} reads as an infinity. Anything else, a stray character or a
@@ -144,7 +148,7 @@ public final class Numbers {
         return new BigInteger(digits, radix).doubleValue();
     }
 
-    /** True for a finite value with no fractional part, as JavaScript's {@code Number.isInteger}. */
+    /** True for a finite value with no fractional part, negative zero included. */
     public static boolean isInteger(double value) {
         return Double.isFinite(value) && Math.rint(value) == value;
     }

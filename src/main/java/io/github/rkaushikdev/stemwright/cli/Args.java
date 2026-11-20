@@ -10,9 +10,9 @@ import java.util.Map;
 
 /**
  * Argument parsing, written rather than installed. The grammar is small and fixed, and its messages
- * and its rules (a boolean flag takes {@code =false}, a number is read as JavaScript reads one) are
- * part of what the cli promises, which a general purpose parser would change. picocli starts the
- * process and hands the arguments on; this is what reads them.
+ * and its rules (a boolean flag takes {@code =false}, a number is read leniently as {@link
+ * Numbers#parse} reads one) are part of what the cli promises, which a general purpose parser would
+ * change. picocli starts the process and hands the arguments on; this is what reads them.
  *
  * <p>Two rules keep it predictable. A flag needs a declaration, so a typo is an error rather than a
  * silently ignored option. And {@code --} ends the flags, so a lemma that begins with a dash can

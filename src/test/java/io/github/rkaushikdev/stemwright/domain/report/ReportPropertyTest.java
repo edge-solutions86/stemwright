@@ -41,7 +41,7 @@ class ReportPropertyTest {
     /**
      * A ledger over the deck: about seven cells in ten answered between one and nine times, right
      * about two times in three, and about one in ten of those suspended. The bound of the answer loop
-     * is drawn again on every pass, as the original drew it.
+     * is drawn again on every pass, on purpose: the draws a seed gives depend on it.
      */
     private static MasteryLedger ledgerFor(SeededRandom random) {
         List<CellStrength> strengths = new ArrayList<>();

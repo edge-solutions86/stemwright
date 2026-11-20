@@ -316,7 +316,7 @@ public final class Server implements AutoCloseable {
 
     /**
      * Writes the reply. A response that may not carry a body, which is any response to a {@code HEAD}
-     * and any 1xx, 204 or 304, is sent without one, as node sends it.
+     * and any 1xx, 204 or 304, is sent without one, as RFC 9110 requires.
      */
     private static void send(HttpExchange exchange, Reply reply) throws IOException {
         exchange.getResponseHeaders().putAll(reply.headers());

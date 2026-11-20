@@ -22,7 +22,7 @@ public class ValidationException extends StemwrightException {
     /**
      * The same refusal, with every detail at {@code path} carrying {@code message} instead. A reader
      * that had to narrow a value before a domain check saw it uses this to put back the message the
-     * value itself would have earned; the original refusal is kept as the cause.
+     * value itself would have earned; the refusal it restates is kept as the cause.
      */
     public ValidationException restating(String path, String message) {
         List<ErrorDetail> restated = details().stream()

@@ -9,8 +9,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
- * The original authenticated request extended the request it carried. The Java one holds it
- * instead, and these check that every part of it is still readable straight off the wrapper.
+ * An authenticated request holds the request it carries rather than extending it, and these check
+ * that every part of it is still readable straight off the wrapper.
  */
 class AuthedRequestTest {
 

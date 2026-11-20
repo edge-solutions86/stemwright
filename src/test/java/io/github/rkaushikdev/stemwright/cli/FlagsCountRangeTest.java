@@ -9,8 +9,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
- * A count is an {@code int} here where the original's was any number, so a whole number past what
- * an {@code int} holds is refused under the flag's name rather than wrapped.
+ * A count is an {@code int}, so a whole number past what an {@code int} holds is refused under the
+ * flag's name rather than wrapped.
  */
 class FlagsCountRangeTest {
 

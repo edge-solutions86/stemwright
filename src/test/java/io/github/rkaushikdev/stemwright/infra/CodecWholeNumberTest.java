@@ -9,8 +9,8 @@ import io.github.rkaushikdev.stemwright.support.Problems;
 import org.junit.jupiter.api.Test;
 
 /**
- * The one reader the original did not have. A Java count or sequence cannot carry a fraction the
- * way a JavaScript number did, so {@link Codec#readWholeNumber} refuses it where it is read.
+ * A stored count or sequence cannot carry a fraction, so {@link Codec#readWholeNumber} refuses one
+ * where it is read rather than letting it travel until something compares it.
  */
 class CodecWholeNumberTest {
 

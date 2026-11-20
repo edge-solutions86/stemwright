@@ -11,8 +11,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
- * What the original suite reads only in part: the help texts line for line, a failure with no
- * message, and what a command built by {@link Command#of} keeps and is handed.
+ * The help texts line for line, a failure with no message, and what a command built by {@link
+ * Command#of} keeps and is handed.
  */
 class ProgramTextTest {
 

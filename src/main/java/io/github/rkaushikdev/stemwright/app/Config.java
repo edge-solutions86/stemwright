@@ -196,13 +196,13 @@ public record Config(
      * refuse under {@code policy}. A field the block leaves out stays out of the patch; one that is
      * present, {@code null} included, must have the right type.
      *
-     * <p>The patch holds its counts as ints and json holds doubles. The original handed a fraction
-     * to the policy, which refused it as {@code must be a whole number: 2.5} at that count's place
-     * among its problems. So a count an int cannot hold, a fraction or a number past the int range,
-     * goes into the patch as a stand-in the policy is certain to refuse under that count's name and
-     * at that count's place, and the refusal is then put in the words the original gave the number
-     * actually written. A stand-in is never zero, so it cannot trip the rule about a policy that asks
-     * for no drilling, which a written fraction or huge number could not trip either.
+     * <p>The patch holds its counts as ints and json holds doubles. A fraction is refused as {@code
+     * must be a whole number: 2.5} at that count's place among the policy's problems. So a count an
+     * int cannot hold, a fraction or a number past the int range, goes into the patch as a stand-in
+     * the policy is certain to refuse under that count's name and at that count's place, and the
+     * refusal is then put in the words that fit the number actually written. A stand-in is never
+     * zero, so it cannot trip the rule about a policy that asks for no drilling, which a written
+     * fraction or huge number could not trip either.
      */
     private static DrillPolicyPatch readPolicy(ProblemCollector problems, Optional<Json> raw) {
         if (raw.isEmpty() || raw.get() instanceof JsonNull) {
@@ -255,9 +255,9 @@ public record Config(
     }
 
     /**
-     * What the original policy said of a count it was given as written. A fraction is not a whole
-     * number; a whole number past the int range is refused as its stand-in was, every such refusal
-     * ending in the number refused, which is swapped for the one written.
+     * The refusal of a count as it was written, rather than of its stand-in. A fraction is not a
+     * whole number; a whole number past the int range is refused as its stand-in was, every such
+     * refusal ending in the number refused, which is swapped for the one written.
      */
     private static String refusalOf(double written, String standInRefusal) {
         if (!Numbers.isInteger(written)) {

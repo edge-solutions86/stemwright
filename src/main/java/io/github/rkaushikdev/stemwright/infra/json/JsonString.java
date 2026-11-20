@@ -4,8 +4,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * A json string. It holds any sequence of utf-16 units, a lone surrogate included, because {@code
- * JSON.parse} accepts one and the journal has to read back whatever it was given.
+ * A json string. It holds any sequence of utf-16 units, a lone surrogate included, because an
+ * escape in json text may spell one and the journal has to read back whatever it was given.
  *
  * @param value the text
  */

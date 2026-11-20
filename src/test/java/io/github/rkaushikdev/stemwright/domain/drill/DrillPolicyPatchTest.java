@@ -7,8 +7,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * Java only. The original spells patch layering as an object spread; these hold {@link
- * DrillPolicyPatch#mergedWith} to the same meaning.
+ * Patch layering: a later patch wins wherever it sets a field, and leaves every field it does not
+ * set as the earlier patch had it. These hold {@link DrillPolicyPatch#mergedWith} to that meaning.
  */
 class DrillPolicyPatchTest {
 

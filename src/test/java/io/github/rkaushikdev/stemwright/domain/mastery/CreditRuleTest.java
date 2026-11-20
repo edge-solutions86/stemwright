@@ -30,7 +30,7 @@ class CreditRuleTest {
         return strength;
     }
 
-    /** The strength with only its due date replaced, as a spread over it would. */
+    /** The strength with only its due date replaced, and every other field kept. */
     private static CellStrength dueOn(CellStrength strength, LocalDate due) {
         return new CellStrength(
                 strength.cellId(),

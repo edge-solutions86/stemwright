@@ -14,8 +14,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * Pins the percent decoding to {@code decodeURIComponent}, which the original decoded every path
- * capture and query string with, and which {@link java.net.URLDecoder} is not.
+ * Pins the strict percent decoding every path capture and query string goes through: escapes spell
+ * utf-8 bytes, a plus sign stays a plus sign, and a malformed escape is refused, none of which
+ * {@link java.net.URLDecoder} does.
  */
 class UriComponentTest {
 

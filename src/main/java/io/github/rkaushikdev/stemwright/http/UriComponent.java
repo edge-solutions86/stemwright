@@ -1,8 +1,8 @@
 package io.github.rkaushikdev.stemwright.http;
 
 /**
- * Percent decoding exactly as JavaScript's {@code decodeURIComponent} does it, which is what the
- * paths and query strings this api answers were always decoded with.
+ * Strict percent decoding of one RFC 3986 component into the text its utf-8 escapes spell, which
+ * is what the paths and query strings this api answers were always decoded with.
  *
  * <p>It is not {@link java.net.URLDecoder}, which decodes a form body: that turns a plus sign into a
  * space and quietly passes over a broken escape. Here a plus sign is a plus sign, every escape must

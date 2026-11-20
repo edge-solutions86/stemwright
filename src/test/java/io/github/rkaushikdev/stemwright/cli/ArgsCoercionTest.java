@@ -9,8 +9,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
- * The corners of the grammar the original suite reached only through JavaScript itself: how {@code
- * Number(text)} reads a number flag, and how the dashes are read.
+ * The corners of the grammar: how leniently a number flag is read (spacing, hex, exponents, a bare
+ * fraction, blank as zero), and how the dashes are read.
  */
 class ArgsCoercionTest {
 
@@ -22,7 +22,7 @@ class ArgsCoercionTest {
     }
 
     @Test
-    void readsANumberFlagAsJavaScriptReadsANumber() {
+    void readsANumberFlagLeniently() {
         assertThat(parse("--limit", " 12 ").numberFlag("limit")).contains(12.0);
         assertThat(parse("--limit", "0x10").numberFlag("limit")).contains(16.0);
         assertThat(parse("--limit", "1e3").numberFlag("limit")).contains(1000.0);

@@ -15,8 +15,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * Pins the json model to what {@code JSON.parse} and {@code JSON.stringify} do, because the
- * journal and the http bodies were written by them and have to read back byte for byte.
+ * Pins the json model to RFC 8259 reading and one canonical way of writing, because the journal
+ * and the http bodies are stored and compared as text and have to read back byte for byte.
  */
 class JsonTest {
 
@@ -175,7 +175,7 @@ class JsonTest {
         }
 
         @Test
-        void printsNumbersAsJavaScriptPrintsThem() {
+        void printsNumbersInTheirShortestRoundTripForm() {
             assertThat(Json.stringify(Json.array(
                             Json.of(1),
                             Json.of(2.5),

@@ -12,8 +12,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * The log lines are output a deployment's operators read and grep, so their text is part of the
- * contract. The original suite only matches a prefix and a fragment of two of them; this pins all
- * three byte for byte, and checks that the other kinds write nothing.
+ * contract. These pin all three byte for byte, and check that the other kinds write nothing.
  */
 class ApplicationLoggingLinesTest {
 
@@ -27,7 +26,7 @@ class ApplicationLoggingLinesTest {
     }
 
     @Test
-    void writesEachLineAsTheOriginalDid() {
+    void writesEachLineByteForByte() {
         app.bus().publish(new DomainEvent.CellSuspended(NOW, "lrn_one", "lrn_one", "cell_aaaaaa", 4));
         app.bus()
                 .publish(new DomainEvent.ProfilePublished(

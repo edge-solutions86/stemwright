@@ -91,9 +91,9 @@ class DrillPolicyTest {
         }
 
         /**
-         * The original refuses a {@code perLexemeCap} of two and a half. A count is an {@code int}
-         * here, so the type refuses that one; what is left of the rule is that a count the policy
-         * cannot hold is reported against its own field, which is checked at the edge of the cap's
+         * A {@code perLexemeCap} of two and a half cannot be written, because a count is an {@code
+         * int} and the type refuses it; what is left of the rule is that a count the policy cannot
+         * hold is reported against its own field, which is checked at the edge of the cap's
          * ceiling.
          */
         @Test

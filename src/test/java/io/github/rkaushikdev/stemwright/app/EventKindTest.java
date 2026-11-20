@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 /**
- * The kinds and the parts of the bus's contract the original suite left implicit: a handler is
+ * The kinds, and the parts of the bus's contract the behaviour tests leave implicit: a handler is
  * filed once, handlers of a kind hear an event before handlers of every event, and a handler added
  * while an event is being delivered waits for the next one.
  */

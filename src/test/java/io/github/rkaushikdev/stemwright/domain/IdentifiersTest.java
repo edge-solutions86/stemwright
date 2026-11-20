@@ -113,15 +113,15 @@ class IdentifiersTest {
     }
 
     /**
-     * Derived ids are stored in every journal the original wrote, so the digest has to give the same
-     * text it gave there. The expected values were computed by an independent emulation of the
-     * original's 32 bit arithmetic over utf-16 code units, not by this implementation.
+     * Derived ids are stored in every journal already written, so the digest has to keep giving the
+     * same text for the same parts. The expected values were computed independently, by wrapping 32
+     * bit arithmetic over the utf-16 code units, not by this implementation.
      */
     @Nested
     class StoredIdCompatibility {
 
         @Test
-        void digestsAsTheOriginalDid() {
+        void digestsAsStoredIdsRequire() {
             assertThat(digest("a", "b")).isEqualTo("07hw33l130bq");
             assertThat(digest("")).isEqualTo("0ztntfp009zl");
             assertThat(digest("lex_aaaaaa", "case=nom;number=sg")).isEqualTo("1vx89a4143zb");
@@ -130,7 +130,7 @@ class IdentifiersTest {
         }
 
         @Test
-        void derivesTheLexemeIdTheOriginalStored() {
+        void derivesTheLexemeIdAStoredJournalHolds() {
             assertThat(derivedId(IdKind.LEXEME, "latin", "puella", "1")).isEqualTo("lex_08bkzeb0i0al");
         }
     }

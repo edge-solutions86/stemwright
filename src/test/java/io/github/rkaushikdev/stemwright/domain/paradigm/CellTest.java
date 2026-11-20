@@ -165,7 +165,7 @@ class CellTest {
                     .hasMessageContaining("homograph index below one");
         }
 
-        /** Java only: the original read any run of digits as a number; an int cannot hold every run. */
+        /** Any run of digits reads as a homograph index; one past what an int holds is refused. */
         @Test
         void refusesAHomographIndexTooLargeForAnyLexeme() {
             assertThat(CellRef.parse("malus(2147483647)/nom.pl").homograph()).isEqualTo(Integer.MAX_VALUE);

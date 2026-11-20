@@ -24,9 +24,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
- * The bodies the routes write, as text. The original suites read them a field at a time, and a
- * client reads them as the original wrote them, so the names, their order and the printed numbers
- * are pinned here.
+ * The bodies the routes write, as text. A client reads them as text too, so the names, their order
+ * and the printed numbers are pinned here.
  */
 class RouteBodiesTest {
 
@@ -65,7 +64,7 @@ class RouteBodiesTest {
     }
 
     @Test
-    void writesTheQueueWithTheFieldsInTheOrderTheOriginalDid() {
+    void writesTheQueueWithItsFieldsInTheirFixedOrder() {
         HttpResponse response = router().handle(makeRequest(
                 Method.GET, DECK + "/queue", token("tok-student").withQuery(COURSE)));
         assertThat(keysOf(response.body())).containsExactly("on", "deckKey", "cells", "excluded");
@@ -89,7 +88,7 @@ class RouteBodiesTest {
     }
 
     @Test
-    void writesTheTallyOfAFinishedSessionWithItsAccuracyAsTheOriginalPrintedIt() {
+    void writesTheTallyOfAFinishedSessionWithItsAccuracyAsAFraction() {
         Router handle = router();
         String cellId = firstCellId(handle);
         HttpResponse wrong = post(handle, DECK + "/answers", answer(cellId, "x"));
@@ -135,7 +134,7 @@ class RouteBodiesTest {
     }
 
     @Test
-    void writesALexemeWithTheFieldsInTheOrderTheOriginalDid() {
+    void writesALexemeWithItsFieldsInTheirFixedOrder() {
         assertThat(Json.stringify(LexiconRoutes.lexemeJson(PUELLA)))
                 .isEqualTo("{\"id\":\"" + PUELLA.id() + "\",\"lemma\":\"puella\",\"citation\":\"puella\","
                         + "\"language\":\"latin\",\"classKey\":\"first-declension\",\"homograph\":1,"

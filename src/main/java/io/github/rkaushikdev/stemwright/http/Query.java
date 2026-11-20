@@ -68,8 +68,8 @@ public final class Query {
     }
 
     /**
-     * A whole number above zero, read as JavaScript's {@code Number} reads it, or nothing when the
-     * parameter is missing or empty. A count is an {@code int}, so a number past {@link
+     * A whole number above zero, read leniently as {@link Numbers#parse} reads it, or nothing when
+     * the parameter is missing or empty. A count is an {@code int}, so a number past {@link
      * Integer#MAX_VALUE} is refused with the same message.
      */
     public static Optional<Integer> positiveFrom(Map<String, String> query, String name) {

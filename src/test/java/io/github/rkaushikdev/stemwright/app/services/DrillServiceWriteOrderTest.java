@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * The order an answer is written in is the recovery story: the attempt log, then the open session,
- * then the ledger, and only then the announcement. The original suite never observes the order, so
+ * then the ledger, and only then the announcement. The order cannot be seen from the results, so
  * this checks it through stores that note each write.
  */
 class DrillServiceWriteOrderTest {

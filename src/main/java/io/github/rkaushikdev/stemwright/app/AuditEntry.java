@@ -12,7 +12,7 @@ import java.util.Optional;
 /**
  * One line of the {@link AuditLog}: who did what to which thing, and when.
  *
- * @param at the instant, as {@code Date#toISOString} printed it, such as {@code
+ * @param at the instant as {@link Instants#toIsoString} stamps it, such as {@code
  *     2025-03-03T09:00:00.000Z}
  * @param on the utc study day of that instant
  * @param actorId the account responsible
