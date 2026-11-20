@@ -1,7 +1,9 @@
 package io.github.rkaushikdev.stemwright.domain.text;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.regex.Pattern;
 
 /**
  * How numbers are printed and rounded wherever a person or a file will read them.
@@ -15,6 +17,10 @@ import java.math.RoundingMode;
 public final class Numbers {
 
     private static final double PLAIN_LIMIT = 1e21;
+
+    /** A decimal as JavaScript's {@code Number(text)} reads one, once the spacing is gone. */
+    private static final Pattern DECIMAL =
+            Pattern.compile("[+-]?(?:Infinity|(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?)");
 
     private Numbers() {}
 
@@ -82,5 +88,49 @@ public final class Numbers {
     /** Rounds to the nearest whole number, a tie going towards positive infinity. */
     public static long round(double value) {
         return Math.round(value);
+    }
+
+    /**
+     * Reads text as a number the way the cli and the query string always have, which is the way
+     * JavaScript's {@code Number(text)} does: spacing around the number is ignored and blank text is
+     * zero; a decimal may have a sign, a missing integer or fraction part ({@code .5}, {@code 5.})
+     * and an exponent; {@code 0x}, {@code 0o} and {@code 0b} introduce an unsigned hex, octal or
+     * binary integer; {@code Infinity} reads as an infinity. Anything else, a stray character or a
+     * digit separator included, is NaN rather than an exception, so a caller decides what a bad
+     * number means.
+     */
+    public static double parse(String text) {
+        String trimmed = Text.trim(text);
+        if (trimmed.isEmpty()) {
+            return 0;
+        }
+        if (trimmed.length() > 2 && trimmed.charAt(0) == '0') {
+            int radix =
+                    switch (trimmed.charAt(1)) {
+                        case 'x', 'X' -> 16;
+                        case 'o', 'O' -> 8;
+                        case 'b', 'B' -> 2;
+                        default -> 0;
+                    };
+            if (radix != 0) {
+                return parseUnsigned(trimmed.substring(2), radix);
+            }
+        }
+        return DECIMAL.matcher(trimmed).matches() ? Double.parseDouble(trimmed) : Double.NaN;
+    }
+
+    private static double parseUnsigned(String digits, int radix) {
+        for (int index = 0; index < digits.length(); index += 1) {
+            char digit = digits.charAt(index);
+            if (digit >= 0x80 || Character.digit(digit, radix) < 0) {
+                return Double.NaN;
+            }
+        }
+        return new BigInteger(digits, radix).doubleValue();
+    }
+
+    /** True for a finite value with no fractional part, as JavaScript's {@code Number.isInteger}. */
+    public static boolean isInteger(double value) {
+        return Double.isFinite(value) && Math.rint(value) == value;
     }
 }
