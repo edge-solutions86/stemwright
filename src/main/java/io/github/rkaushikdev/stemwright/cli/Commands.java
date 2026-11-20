@@ -1,0 +1,226 @@
+package io.github.rkaushikdev.stemwright.cli;
+
+import io.github.rkaushikdev.stemwright.app.Application;
+import io.github.rkaushikdev.stemwright.app.LanguageBundle;
+import io.github.rkaushikdev.stemwright.app.Loaders;
+import io.github.rkaushikdev.stemwright.domain.drill.DrillContext;
+import io.github.rkaushikdev.stemwright.domain.drill.Membership;
+import io.github.rkaushikdev.stemwright.domain.drill.Queue;
+import io.github.rkaushikdev.stemwright.domain.lexicon.Lexeme;
+import io.github.rkaushikdev.stemwright.domain.mastery.Ladder;
+import io.github.rkaushikdev.stemwright.domain.mastery.LedgerCounts;
+import io.github.rkaushikdev.stemwright.domain.mastery.MasteryLedger;
+import io.github.rkaushikdev.stemwright.domain.paradigm.Cell;
+import io.github.rkaushikdev.stemwright.domain.paradigm.ParadigmTable;
+import io.github.rkaushikdev.stemwright.domain.paradigm.ResolvedProfile;
+import io.github.rkaushikdev.stemwright.domain.paradigm.TableRequest;
+import io.github.rkaushikdev.stemwright.domain.report.Coverage;
+import io.github.rkaushikdev.stemwright.domain.report.CoverageRow;
+import io.github.rkaushikdev.stemwright.http.AccountDirectory;
+import io.github.rkaushikdev.stemwright.http.Api;
+import io.github.rkaushikdev.stemwright.http.ApiOptions;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+/**
+ * The commands. Each one loads what it needs, asks the domain, and formats the answer, and none of
+ * them holds a rule of its own.
+ *
+ * <p>{@code paradigm} is the command this cli exists for. An instructor checking why a learner was
+ * marked wrong wants the table the learner was graded against, on the day they were graded, and
+ * that is one call once the revision resolution lives in the layer below.
+ *
+ * <p>Nothing here goes through the report service, because that service takes a course scope so
+ * it can check who is asking. A local operator running this binary has already been trusted by the
+ * file system, and inventing a fake scope to satisfy a check that means nothing here would make the
+ * real check look optional.
+ */
+public final class Commands {
+
+    /** How wide the maturity bar of a coverage row is drawn. */
+    private static final int BAR_WIDTH = 12;
+
+    private Commands() {}
+
+    /** {@code queue}: the cells a learner would be asked on a day, today unless {@code --on} says. */
+    public static Command queue(Application app) {
+        return Command.of(
+                "queue",
+                "show what a learner would be asked today",
+                "stemwright queue --language latin --deck all --learner lrn_one",
+                FlagSpecs.of(
+                        Map.entry("language", Flags.LANGUAGE),
+                        Map.entry("deck", Flags.DECK),
+                        Map.entry("learner", Flags.LEARNER),
+                        Map.entry("on", Flags.DAY)),
+                (args, context) -> {
+                    LocalDate on = Flags.dayFrom(app.clock(), args);
+                    Queue queue = app.drill()
+                            .queue(
+                                    args.requireFlag("learner"),
+                                    args.requireFlag("language"),
+                                    args.requireFlag("deck"),
+                                    on);
+                    return Render.table(
+                            List.of(Column.of("bundle"), Column.of("kind"), Column.of("overdue", Align.RIGHT)),
+                            queue.entries().stream()
+                                    .map(entry -> List.of(
+                                            entry.cell().bundle(),
+                                            entry.kind().key(),
+                                            String.valueOf(entry.overdueDays())))
+                                    .toList());
+                });
+    }
+
+    /**
+     * {@code paradigm}: the table a lexeme was graded against on a day, headed by the profile and
+     * the revision in force then.
+     */
+    public static Command paradigm(Application app) {
+        return Command.of(
+                "paradigm",
+                "print the table a lexeme was graded against on a day",
+                "stemwright paradigm --language latin --lexeme lex_x --rows case --columns number",
+                FlagSpecs.of(
+                        Map.entry("language", Flags.LANGUAGE),
+                        Map.entry("lexeme", requiredString("the lexeme id")),
+                        Map.entry("rows", requiredString("the dimension down the side")),
+                        Map.entry("columns", requiredString("the dimension across the top")),
+                        Map.entry("on", Flags.DAY)),
+                (args, context) -> {
+                    String language = args.requireFlag("language");
+                    LocalDate on = Flags.dayFrom(app.clock(), args);
+                    LanguageBundle bundle = Loaders.requireLanguage(app.stores(), language);
+                    DrillContext drill = app.drill().context(language);
+                    Lexeme entry = drill.lexicon().requireLexeme(args.requireFlag("lexeme"));
+                    ResolvedProfile resolved = drill.book().requireProfileFor(drill.classes(), entry.classKey(), on);
+
+                    ParadigmTable grid = ParadigmTable.build(
+                            bundle.schema(),
+                            bundle.rules(),
+                            entry,
+                            resolved.revision().profile(),
+                            TableRequest.of(args.requireFlag("rows"), args.requireFlag("columns")));
+                    String heading = entry.citationForm() + " under "
+                            + resolved.revision().profileKey() + " revision "
+                            + resolved.revision().ordinal();
+                    return String.join("\n", heading, "", grid.toText());
+                });
+    }
+
+    /**
+     * {@code coverage}: how a learner's ledger stands over a deck on a day against the standard
+     * ladder, and the bundles that need the most work.
+     */
+    public static Command coverage(Application app) {
+        return Command.of(
+                "coverage",
+                "show how much of a deck a learner holds",
+                "stemwright coverage --language latin --deck all --learner lrn_one",
+                FlagSpecs.of(
+                        Map.entry("language", Flags.LANGUAGE),
+                        Map.entry("deck", Flags.DECK),
+                        Map.entry("learner", Flags.LEARNER),
+                        Map.entry("on", Flags.DAY)),
+                (args, context) -> {
+                    String learnerId = args.requireFlag("learner");
+                    LocalDate on = Flags.dayFrom(app.clock(), args);
+                    Membership membership =
+                            app.drill().membership(args.requireFlag("language"), args.requireFlag("deck"), on);
+                    MasteryLedger ledger =
+                            app.stores().ledgers().get(learnerId).orElseGet(() -> MasteryLedger.empty(learnerId));
+                    List<Cell> cells = membership.cells();
+                    LedgerCounts counts =
+                            ledger.counts(cells.stream().map(Cell::id).toList(), Ladder.STANDARD, on);
+                    List<CoverageRow> rows = Coverage.byBundle(cells, ledger, Ladder.STANDARD, on);
+
+                    String summary = Render.keyValues(List.of(
+                            Map.entry("cells", String.valueOf(counts.known())),
+                            Map.entry("introduced", String.valueOf(counts.introduced())),
+                            Map.entry("mature", String.valueOf(counts.mature())),
+                            Map.entry("due", String.valueOf(counts.due())),
+                            Map.entry("suspended", String.valueOf(counts.suspended()))));
+                    String weakest = Render.table(
+                            List.of(Column.of("bundle"), Column.of("maturity"), Column.of("share", Align.RIGHT)),
+                            Coverage.weakestRows(rows).stream()
+                                    .map(row -> List.of(
+                                            row.key(),
+                                            Render.bar(row.maturity(), BAR_WIDTH),
+                                            Render.percent(row.maturity())))
+                                    .toList());
+                    return String.join("\n", summary, "", weakest);
+                });
+    }
+
+    /** {@code lexemes}: the lexicon of a language, or the lexemes a search term matches. */
+    public static Command lexemes(Application app) {
+        return Command.of(
+                "lexemes",
+                "list or search the lexicon of a language",
+                "stemwright lexemes --language latin --search girl",
+                FlagSpecs.of(
+                        Map.entry("language", Flags.LANGUAGE),
+                        Map.entry(
+                                "search",
+                                FlagSpec.of(FlagKind.STRING, "match a lemma or a gloss")
+                                        .withAlias("s"))),
+                (args, context) -> {
+                    String language = args.requireFlag("language");
+                    // Checked before the listing, so a language nobody configured fails rather than
+                    // printing an empty table that reads like an empty lexicon.
+                    Loaders.requireLanguage(app.stores(), language);
+                    Optional<String> term = args.stringFlag("search");
+                    List<Lexeme> entries = term.map(search -> app.lexicon().search(language, search))
+                            .orElseGet(() -> List.copyOf(
+                                    app.lexicon().load(language).byId().values()));
+                    return Render.table(
+                            List.of(Column.of("lemma"), Column.of("class"), Column.of("gloss")),
+                            entries.stream()
+                                    .map(entry -> List.of(
+                                            entry.citationForm(),
+                                            entry.classKey(),
+                                            entry.primaryGloss().orElse("")))
+                                    .toList());
+                });
+    }
+
+    /**
+     * {@code routes}: what the http layer serves, so an operator can see the surface of a running
+     * build without reading its source.
+     */
+    public static Command routes(Application app) {
+        return Command.of(
+                "routes", "list the http routes this build serves", "stemwright routes", Map.of(), (args, context) -> {
+                    AccountDirectory nobody = token -> Optional.empty();
+                    List<String> lines = Api.routeTable(app, ApiOptions.of(nobody));
+                    return Render.table(
+                            List.of(Column.of("method"), Column.of("path")),
+                            lines.stream()
+                                    .map(line -> {
+                                        int space = line.indexOf(' ');
+                                        return List.of(line.substring(0, space), line.substring(space + 1));
+                                    })
+                                    .toList());
+                });
+    }
+
+    /** Every command of the cli, over the one application. */
+    public static List<Command> all(Application app) {
+        return List.of(
+                queue(app),
+                paradigm(app),
+                coverage(app),
+                lexemes(app),
+                routes(app),
+                ImportCommand.of(app),
+                DeckCommand.of(app),
+                DeckCommand.decks(app),
+                DoctorCommand.of(app));
+    }
+
+    private static FlagSpec requiredString(String describe) {
+        return FlagSpec.of(FlagKind.STRING, describe).asRequired();
+    }
+}
