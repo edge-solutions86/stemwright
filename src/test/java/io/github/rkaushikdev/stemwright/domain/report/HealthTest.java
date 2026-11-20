@@ -1,0 +1,235 @@
+package io.github.rkaushikdev.stemwright.domain.report;
+
+import static io.github.rkaushikdev.stemwright.support.Book.FIRST_HISTORY;
+import static io.github.rkaushikdev.stemwright.support.Book.LATIN_BOOK;
+import static io.github.rkaushikdev.stemwright.support.Drill.AGER;
+import static io.github.rkaushikdev.stemwright.support.Drill.BELLUM;
+import static io.github.rkaushikdev.stemwright.support.Drill.PUELLA;
+import static io.github.rkaushikdev.stemwright.support.Drill.REX;
+import static io.github.rkaushikdev.stemwright.support.Profiles.LATIN_NOUN;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import io.github.rkaushikdev.stemwright.domain.drill.Deck;
+import io.github.rkaushikdev.stemwright.domain.drill.DeckInput;
+import io.github.rkaushikdev.stemwright.domain.drill.DeckScopeInput;
+import io.github.rkaushikdev.stemwright.domain.drill.DrillContext;
+import io.github.rkaushikdev.stemwright.domain.drill.Membership;
+import io.github.rkaushikdev.stemwright.domain.lexicon.ClassRegistry;
+import io.github.rkaushikdev.stemwright.domain.lexicon.InflectionClassInput;
+import io.github.rkaushikdev.stemwright.domain.lexicon.Lexeme;
+import io.github.rkaushikdev.stemwright.domain.lexicon.Lexicon;
+import io.github.rkaushikdev.stemwright.domain.lexicon.PartOfSpeech;
+import io.github.rkaushikdev.stemwright.domain.paradigm.ProfileBook;
+import io.github.rkaushikdev.stemwright.domain.paradigm.ProfileBookInput;
+import io.github.rkaushikdev.stemwright.domain.time.CivilDates;
+import io.github.rkaushikdev.stemwright.support.Classes;
+import io.github.rkaushikdev.stemwright.support.TestMaps;
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+class HealthTest {
+
+    private static final LocalDate DAY = CivilDates.parseCivilDate("2024-10-21");
+
+    private static DrillContext contextOf(ClassRegistry classes, ProfileBook book, Lexicon lexicon) {
+        return new DrillContext(LATIN_NOUN, classes, book, lexicon);
+    }
+
+    private static DrillContext contextOf(Lexicon lexicon) {
+        return contextOf(Classes.LATIN, LATIN_BOOK, lexicon);
+    }
+
+    private static DrillContext contextOf() {
+        return contextOf(Lexicon.build("latin", List.of(PUELLA, BELLUM, AGER, REX)));
+    }
+
+    private static List<HealthInput.ResolvedDeck> withDeck(DrillContext context, DeckScopeInput scope) {
+        Deck entry = Deck.of(LATIN_NOUN, DeckInput.builder("all").scope(scope).build());
+        return List.of(new HealthInput.ResolvedDeck(entry, Membership.resolve(context, entry, DAY)));
+    }
+
+    private static List<HealthInput.ResolvedDeck> withDeck(DrillContext context) {
+        return withDeck(context, DeckScopeInput.EMPTY);
+    }
+
+    private static List<Finding> check(DrillContext context, List<HealthInput.ResolvedDeck> decks, LocalDate on) {
+        return Health.check(new HealthInput(context, decks, on));
+    }
+
+    private static List<Finding> check(DrillContext context) {
+        return check(context, List.of(), DAY);
+    }
+
+    private static List<String> messagesFor(List<Finding> findings, String area) {
+        return findings.stream()
+                .filter(finding -> finding.area().equals(area))
+                .map(Finding::message)
+                .toList();
+    }
+
+    @Nested
+    class CheckOverClasses {
+
+        @Test
+        void reportsEveryClassWithNoParadigmAnywhereAboveIt() {
+            List<String> classes = messagesFor(check(contextOf()), "classes");
+            assertThat(classes.stream().anyMatch(message -> message.startsWith("third-declension has no paradigm")))
+                    .isTrue();
+            assertThat(classes.stream().anyMatch(message -> message.startsWith("first-conjugation has no paradigm")))
+                    .isTrue();
+        }
+
+        @Test
+        void saysNothingAboutAClassThatInheritsABindingFromItsParent() {
+            assertThat(String.join("\n", messagesFor(check(contextOf()), "classes")))
+                    .doesNotContain("second-declension.neuter");
+        }
+
+        @Test
+        void staysQuietWhenEveryClassIsBound() {
+            ClassRegistry classes = ClassRegistry.of(
+                    "latin",
+                    List.of(InflectionClassInput.builder("first-declension", PartOfSpeech.NOUN)
+                            .label("First")
+                            .build()));
+            ProfileBook book = ProfileBook.of(new ProfileBookInput(
+                    "latin", List.of(FIRST_HISTORY), TestMaps.ordered("first-declension", "first-declension")));
+            DrillContext context = contextOf(classes, book, Lexicon.build("latin", List.of(PUELLA)));
+            assertThat(messagesFor(check(context), "classes")).isEmpty();
+        }
+    }
+
+    @Nested
+    class CheckOverProfiles {
+
+        @Test
+        void warnsAboutAProfileWithNothingInForceYetAndNamesTheStart() {
+            List<Finding> findings = check(contextOf(), List.of(), CivilDates.parseCivilDate("2024-01-01"));
+            assertThat(messagesFor(findings, "profiles"))
+                    .contains("first-declension has nothing in force on 2024-01-01, the first starts 2024-09-01");
+        }
+
+        @Test
+        void staysQuietOnceEveryProfileHasBeenPublished() {
+            assertThat(messagesFor(check(contextOf()), "profiles")).isEmpty();
+        }
+    }
+
+    @Nested
+    class CheckOverTheLexicon {
+
+        @Test
+        void warnsThatALexemeWhoseClassIsUnboundCannotBeDrilled() {
+            assertThat(messagesFor(check(contextOf()), "lexicon"))
+                    .contains("1 lexemes cannot be drilled because their class has no paradigm");
+        }
+
+        @Test
+        void callsAClassTheRegistryDoesNotHoldAnError() {
+            Lexeme stray = new Lexeme(
+                    PUELLA.id(),
+                    PUELLA.language(),
+                    PUELLA.lemma(),
+                    "fourth-declension",
+                    PUELLA.stems(),
+                    PUELLA.inherent(),
+                    PUELLA.glosses(),
+                    PUELLA.homograph(),
+                    PUELLA.tags(),
+                    PUELLA.note());
+            List<Finding> lexicon = check(contextOf(Lexicon.build("latin", List.of(stray)))).stream()
+                    .filter(finding -> finding.area().equals("lexicon"))
+                    .toList();
+            assertThat(lexicon.getFirst().level()).isEqualTo(FindingLevel.ERROR);
+            assertThat(lexicon.getFirst().message()).contains("fourth-declension");
+        }
+
+        @Test
+        void notesAnEmptyLexiconRatherThanPassingItInSilence() {
+            List<Finding> findings = check(contextOf(Lexicon.build("latin", List.of())));
+            assertThat(messagesFor(findings, "lexicon")).contains("the lexicon is empty");
+        }
+    }
+
+    @Nested
+    class CheckOverDecks {
+
+        @Test
+        void callsADeckThatSelectsNothingAnError() {
+            DrillContext context = contextOf();
+            List<HealthInput.ResolvedDeck> decks = withDeck(
+                    context,
+                    DeckScopeInput.builder().classKeys("third-declension").build());
+            assertThat(check(context, decks, DAY))
+                    .anyMatch(finding -> finding.message().equals("all selects nothing on 2024-10-21"));
+        }
+
+        @Test
+        void notesADeckHoldingOnlyAHandfulOfLexemes() {
+            DrillContext context = contextOf();
+            assertThat(messagesFor(check(context, withDeck(context), DAY), "decks"))
+                    .contains("all holds only 3 lexemes");
+        }
+
+        @Test
+        void notesWhenNothingHasBeenDefinedAtAll() {
+            assertThat(messagesFor(check(contextOf()), "decks")).containsExactly("no decks are defined");
+        }
+    }
+
+    @Nested
+    class TheOrderAndTheSummary {
+
+        @Test
+        void putsErrorsFirstAndNotesLast() {
+            DrillContext context = contextOf();
+            List<FindingLevel> levels = check(context, withDeck(context), DAY).stream()
+                    .map(Finding::level)
+                    .toList();
+            assertThat(levels)
+                    .isEqualTo(levels.stream()
+                            .sorted(Comparator.comparingInt(levels::indexOf))
+                            .toList());
+            assertThat(levels.getFirst()).isEqualTo(FindingLevel.ERROR);
+            assertThat(levels.getLast()).isEqualTo(FindingLevel.NOTE);
+        }
+
+        @Test
+        void keepsTheOrderTheChecksRanInWithinOneLevel() {
+            DrillContext context = contextOf();
+            List<Finding> errors = check(context, withDeck(context), DAY).stream()
+                    .filter(finding -> finding.level() == FindingLevel.ERROR)
+                    .toList();
+            assertThat(errors).allMatch(finding -> finding.area().equals("classes"));
+        }
+
+        @Test
+        void countsEachLevelIncludingTheOnesNothingReached() {
+            assertThat(Health.countLevels(List.of())).isEqualTo(new FindingCounts(0, 0, 0));
+            assertThat(Health.countLevels(List.of(
+                            new Finding(FindingLevel.ERROR, "a", "one"),
+                            new Finding(FindingLevel.ERROR, "a", "two"),
+                            new Finding(FindingLevel.NOTE, "b", "three"))))
+                    .isEqualTo(new FindingCounts(2, 0, 1));
+        }
+
+        @Test
+        void callsALanguageHealthyWhenOnlyWarningsAndNotesWereFound() {
+            assertThat(Health.isHealthy(List.of(new Finding(FindingLevel.WARNING, "a", "one"))))
+                    .isTrue();
+            assertThat(Health.isHealthy(List.of(new Finding(FindingLevel.ERROR, "a", "one"))))
+                    .isFalse();
+            assertThat(Health.isHealthy(List.of())).isTrue();
+        }
+
+        @Test
+        void describesWhatItFoundInOneLine() {
+            assertThat(Health.describe(List.of(), "latin")).isEqualTo("latin has nothing to report");
+            assertThat(Health.describe(List.of(new Finding(FindingLevel.WARNING, "a", "one")), "latin"))
+                    .isEqualTo("latin has 0 errors, 1 warnings and 0 notes");
+        }
+    }
+}
