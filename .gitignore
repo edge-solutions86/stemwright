@@ -6,10 +6,3 @@ build/
 out/
 .stemwright-data/
 .DS_Store
-
-# The TypeScript toolchain, until its sources are removed.
-node_modules/
-dist/
-coverage/
-*.tsbuildinfo
-npm-debug.log*
