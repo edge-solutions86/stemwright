@@ -106,6 +106,7 @@ public record Membership(
         return cells.size();
     }
 
+    /** True when the deck takes no cell at all on the day. */
     public boolean isEmpty() {
         return cells.isEmpty();
     }
