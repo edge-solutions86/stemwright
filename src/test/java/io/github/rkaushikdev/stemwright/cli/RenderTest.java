@@ -83,7 +83,7 @@ class RenderTest {
         @Test
         void neverLeavesTrailingSpacesOnALine() {
             List<String> lines = Text.split(Render.table(columns, List.of(List.of("a", "b"))), "\n");
-            assertThat(lines).allSatisfy(line -> assertThat(line).isEqualTo(line.stripTrailing()));
+            assertThat(lines).allSatisfy(line -> assertThat(line).isEqualTo(Text.trimEnd(line)));
         }
     }
 

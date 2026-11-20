@@ -85,7 +85,7 @@ public final class Render {
                         index < widths.size() ? widths.get(index) : 0,
                         columns.get(index).align()))
                 .collect(Collectors.joining(COLUMN_GAP));
-        return trimEnd(joined);
+        return Text.trimEnd(joined);
     }
 
     /** Pairs one to a line, the values lined up two spaces past the longest key. */
@@ -174,14 +174,5 @@ public final class Render {
 
     private static String firstCodePoints(String value, int count) {
         return value.substring(0, value.offsetByCodePoints(0, count));
-    }
-
-    /** Drops trailing spacing, as {@link Text#isSpace(int)} defines it. */
-    private static String trimEnd(String value) {
-        int end = value.length();
-        while (end > 0 && Text.isSpace(value.charAt(end - 1))) {
-            end -= 1;
-        }
-        return value.substring(0, end);
     }
 }
