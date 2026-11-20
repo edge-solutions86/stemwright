@@ -17,20 +17,12 @@
 
 ### Changed
 
-- The flags more than one command declares now live in `src/cli/flags.ts`. The
-  `--on` handling had already drifted into two spellings, and a second idea of
-  what day it is is not something to leave lying around in a tool organised
-  around days.
+- The flags more than one command declares now live in `cli.Flags`. The `--on`
+  handling had already drifted into two spellings, and a second idea of what
+  day it is is not something to leave lying around in a tool organised around
+  days.
 
 ## Unreleased
-
-### Changed
-
-- Toolchain moved to the February 2025 set: TypeScript 5.7.3, vitest 3.0.5,
-  eslint 9.19.0 with typescript-eslint 8.23.0, prettier 3.4.2, node types 22.
-- ESLint moved from `.eslintrc.cjs` to flat config in `eslint.config.js`. The
-  type checked preset is kept, and `vitest.config.ts` and the config file itself
-  are opted out of it, because neither is inside the project tsconfig.
 
 ### Added
 
@@ -40,11 +32,7 @@
 - The course layer: courses, enrolments, assignments, progress, authorisation.
 - Reporting over coverage, forecasts, rollups and cohorts.
 - Application ports with map backed stores behind them.
-
-### Added
-
-- Continuous integration: format, lint, types and build on one job, the suite on
-  three cells (ubuntu on node 20 and 22, windows on node 22), and coverage with
-  an artifact.
-- Coverage thresholds enforced in `vitest.config.ts`, set just under what the
-  suite reaches so a regression fails the build.
+- Continuous integration: the Maven build with its format check, lint, suite
+  and coverage floor on every push, and the timing suite as its own job.
+- A coverage floor enforced by the build, so a change that drops coverage fails
+  rather than being noticed a month later.
