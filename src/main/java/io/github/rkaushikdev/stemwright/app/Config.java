@@ -225,7 +225,7 @@ public record Config(
                 continue;
             }
             double written = number.value();
-            if (fitsAnInt(written)) {
+            if (Numbers.fitsInt(written)) {
                 count.setter().accept(patch, (int) written);
             } else {
                 unheld.put(count.name(), written);
@@ -254,10 +254,6 @@ public record Config(
         return built;
     }
 
-    private static boolean fitsAnInt(double value) {
-        return Numbers.isInteger(value) && value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE;
-    }
-
     /**
      * What the original policy said of a count it was given as written. A fraction is not a whole
      * number; a whole number past the int range is refused as its stand-in was, every such refusal
@@ -265,20 +261,9 @@ public record Config(
      */
     private static String refusalOf(double written, String standInRefusal) {
         if (!Numbers.isInteger(written)) {
-            return "must be a whole number: " + numberText(written);
+            return "must be a whole number: " + Numbers.text(written);
         }
         return standInRefusal.substring(0, standInRefusal.lastIndexOf(' ') + 1) + Numbers.format(written);
-    }
-
-    /** JavaScript's {@code String(n)}, which, unlike {@link Numbers#format}, prints a NaN or an infinity. */
-    private static String numberText(double value) {
-        if (Double.isNaN(value)) {
-            return "NaN";
-        }
-        if (Double.isInfinite(value)) {
-            return value > 0 ? "Infinity" : "-Infinity";
-        }
-        return Numbers.format(value);
     }
 
     /** A count of the policy block, and how it is set on a patch. */

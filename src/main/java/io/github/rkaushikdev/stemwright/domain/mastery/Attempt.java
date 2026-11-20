@@ -91,7 +91,7 @@ public record Attempt(
         problems.addIf(verdict.isEmpty(), "verdict", "is not a verdict: " + input.verdict());
         input.elapsedMs()
                 .filter(elapsed -> !Double.isFinite(elapsed) || elapsed < 0)
-                .ifPresent(elapsed -> problems.add("elapsedMs", "must not be negative: " + numberText(elapsed)));
+                .ifPresent(elapsed -> problems.add("elapsedMs", "must not be negative: " + Numbers.text(elapsed)));
         String expected = Normalise.normaliseInput(input.expected());
         problems.addIf(expected.isEmpty(), "expected", "must not be blank");
 
@@ -147,10 +147,5 @@ public record Attempt(
         }
         int middle = timed.size() / 2;
         return Optional.of(timed.size() % 2 == 1 ? timed.get(middle) : (timed.get(middle - 1) + timed.get(middle)) / 2);
-    }
-
-    /** The number as a message prints it, with {@code NaN} and {@code Infinity} spelled out. */
-    private static String numberText(double value) {
-        return Double.isFinite(value) ? Numbers.format(value) : String.valueOf(value);
     }
 }

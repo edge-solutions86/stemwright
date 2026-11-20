@@ -165,18 +165,9 @@ public record CreditRule(double share, boolean allowClimb, boolean introduces) {
          */
         public CreditRule build() {
             if (!Double.isFinite(share) || share < 0 || share > 1) {
-                throw ValidationException.field("share", "must be between nought and one: " + printed(share));
+                throw ValidationException.field("share", "must be between nought and one: " + Numbers.text(share));
             }
             return new CreditRule(share, allowClimb, introduces);
-        }
-
-        /**
-         * A number as the original printed it. {@link Numbers#format(double)} has no text for a
-         * value that is not finite, and the spellings the original used for those, {@code NaN} and
-         * {@code Infinity}, are the ones {@link Double#toString(double)} gives.
-         */
-        private static String printed(double value) {
-            return Double.isFinite(value) ? Numbers.format(value) : Double.toString(value);
         }
     }
 }

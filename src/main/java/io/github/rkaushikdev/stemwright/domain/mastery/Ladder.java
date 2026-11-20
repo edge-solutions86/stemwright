@@ -78,20 +78,11 @@ public record Ladder(String key, String label, List<Integer> rungs, int lapseDro
 
         double spread = input.spread().orElse(DEFAULT_SPREAD);
         if (!Double.isFinite(spread) || spread < 0 || spread > MAX_SPREAD) {
-            problems.add("spread", "must be between zero and one half: " + printed(spread));
+            problems.add("spread", "must be between zero and one half: " + Numbers.text(spread));
         }
 
         problems.throwIfAny("ladder " + key + " is not usable");
         return new Ladder(key, input.label().orElse(key), rungs, lapseDrop, spread);
-    }
-
-    /**
-     * A number as the original printed it. {@link Numbers#format(double)} has no text for a value
-     * that is not finite, and the spellings the original used for those, {@code NaN} and {@code
-     * Infinity}, are the ones {@link Double#toString(double)} gives.
-     */
-    private static String printed(double value) {
-        return Double.isFinite(value) ? Numbers.format(value) : Double.toString(value);
     }
 
     public int rungCount() {

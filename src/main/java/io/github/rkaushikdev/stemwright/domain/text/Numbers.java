@@ -58,6 +58,21 @@ public final class Numbers {
         return mantissa + "e" + (shown < 0 ? "-" : "+") + Math.abs(shown);
     }
 
+    /**
+     * A number as a message prints it, which is {@link #format(double)} for a finite value and
+     * {@code NaN}, {@code Infinity} or {@code -Infinity} otherwise, as JavaScript's {@code String(n)}
+     * spells them. A refusal quotes the value it refused, whatever it was.
+     */
+    public static String text(double value) {
+        if (Double.isNaN(value)) {
+            return "NaN";
+        }
+        if (Double.isInfinite(value)) {
+            return value > 0 ? "Infinity" : "-Infinity";
+        }
+        return format(value);
+    }
+
     /** {@link #format(double)} for a whole number. */
     public static String format(long value) {
         return Long.toString(value);
@@ -132,5 +147,10 @@ public final class Numbers {
     /** True for a finite value with no fractional part, as JavaScript's {@code Number.isInteger}. */
     public static boolean isInteger(double value) {
         return Double.isFinite(value) && Math.rint(value) == value;
+    }
+
+    /** True for a whole number an {@code int} can hold, so a cast to {@code int} loses nothing. */
+    public static boolean fitsInt(double value) {
+        return isInteger(value) && value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE;
     }
 }

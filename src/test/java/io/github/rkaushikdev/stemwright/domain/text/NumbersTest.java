@@ -166,5 +166,31 @@ class NumbersTest {
             assertThat(Numbers.isInteger(Double.NaN)).isFalse();
             assertThat(Numbers.isInteger(Double.POSITIVE_INFINITY)).isFalse();
         }
+
+        @Test
+        void fitsAnIntOnlyWhenWholeAndInRange() {
+            assertThat(Numbers.fitsInt(Integer.MAX_VALUE)).isTrue();
+            assertThat(Numbers.fitsInt(Integer.MIN_VALUE)).isTrue();
+            assertThat(Numbers.fitsInt(Integer.MAX_VALUE + 1.0)).isFalse();
+            assertThat(Numbers.fitsInt(2.5)).isFalse();
+            assertThat(Numbers.fitsInt(Double.NaN)).isFalse();
+        }
+    }
+
+    @Nested
+    class MessageText {
+
+        @Test
+        void spellsOutWhatFormatRefuses() {
+            assertThat(Numbers.text(Double.NaN)).isEqualTo("NaN");
+            assertThat(Numbers.text(Double.POSITIVE_INFINITY)).isEqualTo("Infinity");
+            assertThat(Numbers.text(Double.NEGATIVE_INFINITY)).isEqualTo("-Infinity");
+        }
+
+        @Test
+        void printsAFiniteValueAsFormatDoes() {
+            assertThat(Numbers.text(2.5)).isEqualTo("2.5");
+            assertThat(Numbers.text(3)).isEqualTo("3");
+        }
     }
 }

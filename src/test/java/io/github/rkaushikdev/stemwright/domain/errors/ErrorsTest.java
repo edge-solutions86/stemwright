@@ -72,6 +72,26 @@ class ErrorsTest {
     }
 
     @Nested
+    class ValidationExceptionRestating {
+
+        @Test
+        void swapsTheMessageAtOnePathAndKeepsTheRest() {
+            ValidationException original = new ValidationException(
+                    "row is not usable",
+                    List.of(
+                            new ErrorDetail("homograph", "must be a positive whole number: 0"),
+                            new ErrorDetail("lemma", "must not be blank")));
+            ValidationException restated = original.restating("homograph", "must be a positive whole number: 2.5");
+            assertThat(restated.getMessage()).isEqualTo("row is not usable");
+            assertThat(restated.details())
+                    .containsExactly(
+                            new ErrorDetail("homograph", "must be a positive whole number: 2.5"),
+                            new ErrorDetail("lemma", "must not be blank"));
+            assertThat(restated.getCause()).isSameAs(original);
+        }
+    }
+
+    @Nested
     class NotFoundExceptionBasics {
 
         @Test

@@ -1,6 +1,5 @@
 package io.github.rkaushikdev.stemwright.infra;
 
-import io.github.rkaushikdev.stemwright.domain.errors.ErrorDetail;
 import io.github.rkaushikdev.stemwright.domain.errors.ValidationException;
 import io.github.rkaushikdev.stemwright.domain.mastery.Attempt;
 import io.github.rkaushikdev.stemwright.domain.mastery.AttemptInput;
@@ -92,13 +91,13 @@ public final class Records {
                 .revisionId(Codec.readString(row, path, "revisionId"));
         elapsedMs.ifPresent(input::elapsedMs);
 
-        if (fitsAnInt(sequence)) {
+        if (Numbers.fitsInt(sequence)) {
             return Attempt.of(input.sequence((int) sequence).build());
         }
         try {
             return Attempt.of(input.sequence(0).build());
         } catch (ValidationException error) {
-            throw restated(error, "sequence", sequenceProblem(sequence));
+            throw error.restating("sequence", sequenceProblem(sequence));
         }
     }
 
@@ -199,10 +198,6 @@ public final class Records {
         return (int) value;
     }
 
-    private static boolean fitsAnInt(double value) {
-        return Numbers.isInteger(value) && value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE;
-    }
-
     /** What is wrong with a finite sequence an {@code int} cannot carry. */
     private static String sequenceProblem(double value) {
         return Numbers.isInteger(value) && value > Integer.MAX_VALUE
@@ -212,13 +207,5 @@ public final class Records {
 
     private static String tooLarge(double value) {
         return "must be at most " + Integer.MAX_VALUE + ": " + Numbers.format(value);
-    }
-
-    /** The same refusal with its problem at the path, if it has one, carrying the message given. */
-    private static ValidationException restated(ValidationException error, String path, String message) {
-        List<ErrorDetail> details = error.details().stream()
-                .map(detail -> detail.path().equals(path) ? new ErrorDetail(path, message) : detail)
-                .toList();
-        return new ValidationException(error.getMessage(), details, error);
     }
 }

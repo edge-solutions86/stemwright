@@ -93,13 +93,13 @@ public final class LexiconImport {
             return Lexeme.of(context, input.build());
         }
         double homograph = Numbers.parse(cell);
-        if (fitsAnInt(homograph)) {
+        if (Numbers.fitsInt(homograph)) {
             return Lexeme.of(context, input.homograph((int) homograph).build());
         }
         try {
             return Lexeme.of(context, input.homograph(0).build());
         } catch (ValidationException error) {
-            throw restated(error, homographProblem(homograph));
+            throw error.restating(HOMOGRAPH, homographProblem(homograph));
         }
     }
 
@@ -147,24 +147,11 @@ public final class LexiconImport {
         return List.of(new ErrorDetail("row", String.valueOf(error.getMessage())));
     }
 
-    private static boolean fitsAnInt(double value) {
-        return Numbers.isInteger(value) && value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE;
-    }
-
     /** What is wrong with a homograph cell an {@code int} cannot carry. */
     private static String homographProblem(double value) {
         if (Numbers.isInteger(value) && value > Integer.MAX_VALUE) {
             return "must be at most " + Integer.MAX_VALUE + ": " + Numbers.format(value);
         }
-        String text = Double.isFinite(value) ? Numbers.format(value) : String.valueOf(value);
-        return "must be a positive whole number: " + text;
-    }
-
-    /** The same refusal with its homograph problem, if it has one, carrying the message given. */
-    private static ValidationException restated(ValidationException error, String message) {
-        List<ErrorDetail> details = error.details().stream()
-                .map(detail -> detail.path().equals(HOMOGRAPH) ? new ErrorDetail(HOMOGRAPH, message) : detail)
-                .toList();
-        return new ValidationException(error.getMessage(), details, error);
+        return "must be a positive whole number: " + Numbers.text(value);
     }
 }
