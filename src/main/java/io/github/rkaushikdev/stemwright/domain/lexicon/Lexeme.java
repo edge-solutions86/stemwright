@@ -120,7 +120,7 @@ public record Lexeme(
         return checked;
     }
 
-    /** The form printed in a word list:the lemma, with the homograph index after a later homograph. */
+    /** The form printed in a word list: the lemma, with the homograph index after a later homograph. */
     public String citationForm() {
         return homograph == 1 ? lemma : lemma + " (" + homograph + ")";
     }
