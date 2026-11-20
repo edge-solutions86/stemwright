@@ -58,6 +58,18 @@ public final class Text {
         return value.substring(start, end);
     }
 
+    /**
+     * Removes spacing, as {@link #isSpace(int)} defines it, from the end only. A padded column keeps
+     * its leading spaces and loses the trailing ones, which is what a line of a printed table wants.
+     */
+    public static String trimEnd(String value) {
+        int end = value.length();
+        while (end > 0 && isSpace(value.charAt(end - 1))) {
+            end -= 1;
+        }
+        return value.substring(0, end);
+    }
+
     /** Lower cases by the Unicode default mapping, whatever the machine's locale. */
     public static String lower(String value) {
         return value.toLowerCase(Locale.ROOT);

@@ -27,6 +27,13 @@ class TextTest {
         void doesNotTreatTheNextLineControlAsSpacing() {
             assertThat(Text.trim("\u0085a")).isEqualTo("\u0085a");
         }
+
+        @Test
+        void trimsOnlyTheEndWhenAskedTo() {
+            assertThat(Text.trimEnd("  oi kos 　\t\n")).isEqualTo("  oi kos");
+            assertThat(Text.trimEnd(" \t ")).isEmpty();
+            assertThat(Text.trimEnd("a\u0085")).isEqualTo("a\u0085");
+        }
     }
 
     @Nested
