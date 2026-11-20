@@ -127,6 +127,8 @@
           <release>${java.version}</release>
           <compilerArgs>
             <arg>-Xlint:all</arg>
+            <!-- picocli-codegen leaves annotations it does not claim, which is not a defect. -->
+            <arg>-Xlint:-processing</arg>
             <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
           </compilerArgs>
           <annotationProcessorPaths>
